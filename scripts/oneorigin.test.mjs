@@ -64,7 +64,7 @@ describe('tokens.json', () => {
     assert.deepEqual(validateTokens(tokens), [])
   })
 
-  it('holds the owner\'s focus rule and the three tools\' tiles, and leaves OneLineage out', () => {
+  it('holds the owner\'s focus rule and the three tools\' tiles, and leaves OneLineage and OneFamily out', () => {
     assert.deepEqual([tokens.color.focus.light, tokens.color.focus.dark, tokens.color.accent.light], ['#a65f20', '#e7a066', '#cf8137'])
     assert.deepEqual(Object.keys(tokens.tools).sort(), ['onepedigree', 'onephylogeny', 'onetaxonomy'])
     assert.deepEqual(Object.values(tokens.tools).map((t) => t.prefix).sort(), ['op', 'ophy', 'ot'])
@@ -95,7 +95,7 @@ describe('tokens.json', () => {
   })
 })
 
-// The palette's checks, as the owner approved them on 2026-11-12: any two of the four tool colors and the one stay
+// The palette's checks, as the owner approved them on 2026-11-12 and kept for five tools on 2026-11-15 (D206): any two of the tool colors and the one stay
 // apart by a CIELAB difference of 15 or more with normal vision and under protanopia, deuteranopia and tritanopia;
 // every text color is 4.5:1 or better on white; the one is 4.5:1 or better on white, and its dark version on the
 // dark backgrounds. Colorblind views use the Machado, Oliveira and Fernandes (2009) matrices at full severity, applied
@@ -138,20 +138,29 @@ describe('the palette', () => {
   const bases = Object.values(palette.tools).map((t) => t.base)
   const darkBackgrounds = [palette['dark-background'], tokens.color.background.dark]
 
-  it('has the four tools, OneLineage included, in the approved colors', () => {
-    assert.deepEqual(Object.keys(palette.tools), ['onetaxonomy', 'onephylogeny', 'onelineage', 'onepedigree'])
-    assert.deepEqual(bases, ['#fc9583', '#44a446', '#3fb1e4', '#907be8'])
+  it('has the five tools in zoom order, in the colors of option D (D206)', () => {
+    assert.deepEqual(Object.keys(palette.tools), ['onetaxonomy', 'onelineage', 'onephylogeny', 'onepedigree', 'onefamily'])
+    assert.deepEqual(bases, ['#fb81ab', '#1ecdef', '#58ac66', '#898beb', '#e5b254'])
     assert.deepEqual([palette['the-one'].light, palette['the-one'].dark, palette.center], ['#1f6f6b', '#3fb3a8', '#fbf8f2'])
     assert.deepEqual([palette.lines.light, palette.lines.dark], ['#363051', '#ece6f2'])
   })
 
   const vision = { normal: 'with normal vision', protan: 'under protanopia', deutan: 'under deuteranopia', tritan: 'under tritanopia' }
   for (const [kind, words] of Object.entries(vision)) {
-    it(`keeps the four tool colors and the one 15 or more apart, ${words}`, () => {
+    it(`keeps the five tool colors and the one 15 or more apart, ${words}`, () => {
       const { d, pair } = closest([...bases, palette['the-one'].light], kind)
       assert.ok(d >= 15, `${pair} are only ${d.toFixed(1)} apart`)
     })
   }
+
+  // Option D was picked partly for this (D206): on dark backgrounds the lighter teal stays 10 or more from every tool
+  // color under every kind of vision. The earlier palette reached only 7.0.
+  it('keeps the dark teal 10 or more from every tool color, under every kind of vision', () => {
+    for (const kind of Object.keys(vision)) for (const base of bases) {
+      const d = deltaE(seenAs(palette['the-one'].dark, kind), seenAs(base, kind))
+      assert.ok(d >= 10, `${kind}: the dark teal and ${base} are only ${d.toFixed(1)} apart`)
+    }
+  })
 
   it('gives every tool a text color of 4.5:1 or better on white, and the one 4.5:1 on white and on the dark backgrounds', () => {
     for (const [id, tool] of Object.entries(palette.tools)) assert.ok(contrast(tool.text, '#ffffff') >= 4.5, `${id} text ${tool.text}: ${contrast(tool.text, '#ffffff').toFixed(2)}`)
@@ -179,11 +188,11 @@ describe('the palette', () => {
 
 describe('the marks', () => {
   const palette = tokens.palette
-  const marks = { oneorigin: 'OneOrigin', onetaxonomy: 'OneTaxonomy', onephylogeny: 'OnePhylogeny', onelineage: 'OneLineage', onepedigree: 'OnePedigree' }
+  const marks = { oneorigin: 'OneOrigin', onetaxonomy: 'OneTaxonomy', onelineage: 'OneLineage', onephylogeny: 'OnePhylogeny', onepedigree: 'OnePedigree', onefamily: 'OneFamily' }
   const files = readdirSync(join(repo, SOURCE_PATH, 'marks')).sort()
   const shades = Object.values(palette.tools).flatMap((t) => [t.base, t.level1, t.level2])
 
-  it('are the five marks, each light, dark and small', () => {
+  it('are the six marks, each light, dark and small', () => {
     assert.deepEqual(files, Object.keys(marks).flatMap((m) => ['dark', 'light', 'small'].map((v) => `${m}-${v}.svg`)).sort())
   })
 
@@ -206,7 +215,7 @@ describe('the marks', () => {
     })
   }
 
-  it('give each tool mark its own color, and the suite mark all four', () => {
+  it('give each tool mark its own color, and the suite mark all five', () => {
     for (const [id, tool] of Object.entries(palette.tools)) {
       const svg = readFileSync(join(repo, SOURCE_PATH, 'marks', `${id}-light.svg`), 'utf8')
       assert.ok([tool.base, tool.level1, tool.level2].some((c) => svg.includes(`fill="${c}"`)), id)
@@ -334,7 +343,7 @@ describe('command line', () => {
     const { tool } = fixture()
     const ok = run(['check', '--root', tool, '--offline'])
     assert.equal(ok.status, 0, ok.stdout + ok.stderr)
-    assert.match(ok.stdout, /Warning: Couldn't check[\s\S]*OneOrigin check passed: 26 files match/)
+    assert.match(ok.stdout, /Warning: Couldn't check[\s\S]*OneOrigin check passed: 29 files match/)
     writeFileSync(join(tool, COPY_PATH, 'tokens.json'), '{}\n')
     const bad = run(['check', '--root', tool, '--offline'], { GITHUB_ACTIONS: 'true' })
     assert.equal(bad.status, 1)

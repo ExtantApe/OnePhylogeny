@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Five tools in the OneOrigin palette (owner's pick, 2026-11-15, D206):** OneFamily joins the suite, so the palette now has five evenly spaced tool colors: OneTaxonomy `#fb81ab`, OneLineage `#1ecdef`, OnePhylogeny `#58ac66`, OnePedigree `#898beb` and OneFamily `#e5b254`. The teal, cream and aubergine are unchanged. The spiral mark is now OneFamily's, in gold. OneLineage has a new tree-of-life mark, and the suite mark shows all five colors. A new test keeps the lighter teal 10 or more from every tool color on dark backgrounds (10.7 today, up from 7.0). Not tested: how the marks look in a real app.
+
 - **New Mac app identifier:** the desktop app's identifier is now `com.extantape.onephylogeny`. macOS treats it as a new app, so the first launch after updating starts with default settings and asks again for any permissions it needs. This happens once. Your project files are untouched. The shared OneOrigin guidelines now say every tool's identifier is `com.extantape.<tool>`.
 
 ## 0.1.0-alpha.8
