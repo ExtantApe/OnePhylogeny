@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **Tree tab no longer crashes on a profile with no tree block (Captive Origins K556):** the Mac app's Tree tab now says there are no tree settings and offers an Add default tree settings button (MFP, 1000 bootstraps, 1000 SH-aLRT, seed 1). Tested: a new app test opens a profile without a tree block, sees the message, adds the defaults and gets the form. Not tested: IQ-TREE builds from a profile that got its settings this way, and the look in the real Mac app.
+
 - **Five tools in the OneOrigin palette (owner's pick, 2026-11-15, D206):** OneFamily joins the suite, so the palette now has five evenly spaced tool colors: OneTaxonomy `#fb81ab`, OneLineage `#1ecdef`, OnePhylogeny `#58ac66`, OnePedigree `#898beb` and OneFamily `#e5b254`. The teal, cream and aubergine are unchanged. The spiral mark is now OneFamily's, in gold. OneLineage has a new tree-of-life mark, and the suite mark shows all five colors. A new test keeps the lighter teal 10 or more from every tool color on dark backgrounds (10.7 today, up from 7.0). Not tested: how the marks look in a real app.
 
 - **New Mac app identifier:** the desktop app's identifier is now `com.extantape.onephylogeny`. macOS treats it as a new app, so the first launch after updating starts with default settings and asks again for any permissions it needs. This happens once. Your project files are untouched. The shared OneOrigin guidelines now say every tool's identifier is `com.extantape.<tool>`.
