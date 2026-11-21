@@ -1,6 +1,6 @@
 {
   "name": "@extantape/onephylogeny-cli",
-  "version": "0.1.0-alpha.8",
+  "version": "0.1.0-alpha.9",
   "description": "OnePhylogeny command line: run profiles, build panels, test samples and suggest outgroups.",
   "keywords": [
     "phylogenetics",
