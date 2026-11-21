@@ -1,4 +1,4 @@
-import { APIError, type CollectionBeforeChangeHook, type Condition, type Field, type FieldAccess, type Where } from 'payload'
+import { APIError, ValidationError, type CollectionBeforeChangeHook, type Condition, type Config, type Field, type FieldAccess, type Where } from 'payload'
 
 /**
  * Settings for samples that came from outside the host: a paper, a public database, a validated panel or an institution.
@@ -35,16 +35,74 @@ export const REALMS = ['land', 'marine', 'freshwater'] as const
 export type DataLicense = (typeof DATA_LICENSES)[number]
 
 /**
- * What a data license lets a host do with a sequence, read so an unknown or unstated license allows nothing: the record
- * is a pointer to the source, with no copy kept and nothing passed on, until a curator sets a real license. `other`
- * means the terms are written in `dataLicenseNote`, and a person has to read them; the plugin doesn't guess.
+ * What a data license lets a host do with a sequence, read so a license the plugin can't decide on allows nothing: the
+ * record is a pointer to the source, with no copy kept and nothing passed on, until a curator sets a real license. That
+ * covers `unknown`, nothing at all, and `other`: its terms are written in `dataLicenseNote`, which only a person can read,
+ * so the plugin answers no. A host that has read them moves the record to a real license.
  */
 export function licenseTerms(license: string | null | undefined): { keepCopy: boolean; redistribute: boolean; commercial: boolean; pointerOnly: boolean } {
   switch (license) {
     case 'cc0': case 'insdc': case 'cc-by': return { keepCopy: true, redistribute: true, commercial: true, pointerOnly: false }
     case 'cc-by-nc': return { keepCopy: true, redistribute: true, commercial: false, pointerOnly: false }
-    case 'other': return { keepCopy: true, redistribute: false, commercial: false, pointerOnly: false }
     default: return { keepCopy: false, redistribute: false, commercial: false, pointerOnly: true }
+  }
+}
+
+/** No spaces, lower case, so `GenBank`, ` genbank ` and `Gen Bank` name the same database and `AB 1` is `AB1`. */
+const normalize = (v: unknown): string => String(v).replace(/\s+/g, '').toLowerCase()
+
+/**
+ * The key the unique index holds for a source record: `database:accession`, both normalized. Accessions are folded to
+ * lower case because GenBank, ENA and BOLD read them without regard to case. Undefined when either part is missing, so
+ * the sparse index skips samples with no public record.
+ */
+export const sourceKeyOf = (database: unknown, accession: unknown): string | undefined =>
+  hasValue(database) && hasValue(accession) ? `${normalize(database)}:${normalize(accession)}` : undefined
+
+const SOURCE_KEY_PATH = /source[_.]?key$/i
+const duplicateMessage = (database: unknown, accession: unknown) => `Another sample already records ${String(database)} ${String(accession)}. Edit that sample instead of adding a second.`
+const collidedMessage = (database: unknown, accession: unknown) => `Another write landed in the same instant, most likely a sample with ${String(database)} ${String(accession)}. Try again: if that sample exists, you'll be told so.`
+
+/** A duplicate-key error from either adapter, which Payload reports as a validation error on the field. */
+const isDuplicateKey = (e: unknown): boolean =>
+  e instanceof ValidationError && Boolean((e.data as { errors?: { path?: string }[] } | undefined)?.errors?.some((f) => SOURCE_KEY_PATH.test(String(f.path ?? ''))))
+/** MongoDB inside a transaction reports a clash with an uncommitted write as a write conflict, with no key named. */
+const isWriteConflict = (e: unknown): boolean => {
+  const err = e as { code?: unknown; codeName?: unknown; message?: unknown } | null
+  return Boolean(err && typeof err === 'object' && (err.code === 112 || err.codeName === 'WriteConflict' || /WriteConflict|retry your operation/i.test(String(err.message ?? ''))))
+}
+
+/**
+ * Wraps the host's database adapter so the unique index's own refusal reads like the hook's. The hook's `find` check is
+ * the friendly first line; the index is the backstop for two writes in the same instant. Its duplicate-key error (a
+ * `ValidationError` on `external.sourceKey`) comes back as the same plain message. Under a MongoDB transaction the
+ * second of two concurrent writes sees a write conflict instead, which names no key, so that one says a write collided
+ * and names the likely pair; the retry meets the hook's check and gets the exact message. Collection `afterError`
+ * hooks only run for REST and GraphQL, so this is the one place a Local API caller gets the same answer.
+ */
+type Db = NonNullable<Config['db']>
+export const withSourceKeyErrors = (db: Db | undefined, samples: string): Db | undefined => {
+  if (!db) return db
+  const rethrow = (e: unknown, args: { collection?: string; data?: Doc }): never => {
+    const ext = args.data?.external as Doc | undefined
+    if (args.collection !== samples || !hasValue(ext?.sourceKey)) throw e
+    if (isDuplicateKey(e)) throw new APIError(duplicateMessage(ext?.database, ext?.accession), 400, undefined, true)
+    if (isWriteConflict(e)) throw new APIError(collidedMessage(ext?.database, ext?.accession), 409, undefined, true)
+    throw e
+  }
+  return {
+    ...db,
+    init: (args: Parameters<Db['init']>[0]) => {
+      const adapter = db.init(args) as unknown as Record<string, unknown>
+      for (const op of ['create', 'updateOne', 'upsert']) {
+        const original = adapter[op]
+        if (typeof original !== 'function') continue
+        adapter[op] = async (a: { collection?: string; data?: Doc }) => {
+          try { return await (original as (this: unknown, a: unknown) => Promise<unknown>).call(adapter, a) } catch (e) { return rethrow(e, a) }
+        }
+      }
+      return adapter as unknown as ReturnType<Db['init']>
+    },
   }
 }
 
@@ -98,14 +156,16 @@ export function externalFields(o: ExternalOptions): { origin: Field; external: F
       name: 'external', type: 'group', admin: { ...whenExternal, description: 'Where an external sample came from. Never a keeper\'s data, and never a locality.' },
       fields: [
         { name: 'sourceType', type: 'select', options: [...SOURCE_TYPES] },
-        { name: 'accession', type: 'text', index: true, admin: { description: 'The source\'s own identifier, such as a GenBank or ENA accession. Unique with its database.' } },
+        { name: 'accession', type: 'text', index: true, admin: { description: 'The source\'s own identifier, such as a GenBank or ENA accession. Unique with its database, without regard to case or spacing.' } },
         { name: 'database', type: 'text', admin: { description: 'The database the accession belongs to, such as GenBank, ENA, BOLD or GBIF. Empty for a paper or institution with no public record.' } },
+        // Filled by the hook, never by hand. Not required, so the adapters give it a sparse unique index that skips samples with no public record.
+        { name: 'sourceKey', type: 'text', unique: true, hidden: true, admin: { readOnly: true, hidden: true } },
         { name: 'voucher', type: 'group', fields: [{ name: 'institution', type: 'text', admin: { description: 'The collection\'s code.' } }, { name: 'catalogNumber', type: 'text' }] },
         { name: 'collector', type: 'text', access: { read: restricted, update: restricted }, admin: { description: 'Who collected it, as the source names them. Restricted.' } },
         { name: 'collectionDatePrecision', type: 'select', options: [...DATE_PRECISIONS], admin: { description: 'How much of the collection date to trust. Sources often give a year only.' } },
         { name: 'permit', type: 'text', access: { read: restricted, update: restricted }, admin: { description: 'The permit reference the source gives, as written. Restricted.' } },
-        { name: 'dataLicense', type: 'select', options: [...DATA_LICENSES], admin: { description: 'Decides what may be done with the sequence. Unknown means pointer only: no copy kept and nothing passed on.' } },
-        { name: 'dataLicenseNote', type: 'text', admin: { description: 'For other: the terms as written, or a link to them.' } },
+        { name: 'dataLicense', type: 'select', options: [...DATA_LICENSES], admin: { description: 'Decides what may be done with the sequence. Unknown and other mean pointer only: no copy kept and nothing passed on, until a curator who has read the terms sets a real license.' } },
+        { name: 'dataLicenseNote', type: 'text', admin: { description: 'For other: the terms as written, or a link to them, for a person to read.' } },
         { name: 'citation', type: 'text' },
         { name: 'doi', type: 'text' },
         { name: 'url', type: 'text', access: { read: url }, admin: { description: 'The source\'s own page for this record. Shown only where the host allows.' } },
@@ -158,10 +218,16 @@ export const sampleRules = (c: { samples: string; hasKit: boolean; ecoregions: E
     if (!hasValue(external.sourceType)) fail('An external sample needs its source type: paper, public database, validated panel or institution.')
     // The license fails closed: not stated means unknown, and unknown means pointer only.
     if (!hasValue(external.dataLicense)) { external.dataLicense = 'unknown'; data.external = { ...(data.external as Doc | undefined), dataLicense: 'unknown' } }
-    if (hasValue(external.accession) && hasValue(external.database)) {
-      const where: Where = { and: [{ 'external.accession': { equals: external.accession } }, { 'external.database': { equals: external.database } }, ...(operation === 'update' && originalDoc?.id != null ? [{ id: { not_equals: originalDoc.id } }] : [])] }
+    // The key is the plugin's, computed from the record as it will be, so a value sent by a client is replaced, and a
+    // cleared accession takes the key with it. The key is left out rather than set to null, because a sparse index still indexes an explicit null.
+    const key = sourceKeyOf(external.database, external.accession)
+    const sent = { ...(data.external as Doc | undefined) }
+    delete sent.sourceKey
+    data.external = key ? { ...sent, sourceKey: key } : sent
+    if (key) {
+      const where: Where = { and: [{ 'external.sourceKey': { equals: key } }, ...(operation === 'update' && originalDoc?.id != null ? [{ id: { not_equals: originalDoc.id } }] : [])] }
       const taken = await req.payload.find({ collection: c.samples as never, where, limit: 1, depth: 0, overrideAccess: true })
-      if (taken.docs.length) fail(`Another sample already records ${external.database} ${external.accession}. Edit that sample instead of adding a second.`)
+      if (taken.docs.length) fail(duplicateMessage(external.database, external.accession))
     }
   }
 

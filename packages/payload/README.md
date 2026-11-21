@@ -42,11 +42,11 @@ A sample is `internal` (the host's own material, from a kit, an upload or a hist
 | Field | What it holds |
 | --- | --- |
 | `sourceType` | `paper`, `public-database`, `validated-panel` or `institution`. Required. |
-| `accession`, `database` | The source's own identifier and the database it belongs to. Unique together where both are set. |
+| `accession`, `database` | The source's own identifier and the database it belongs to. Unique together where both are set, without regard to case or spacing: `GenBank AB000001` and ` genbank ab000001` are one record. A hidden `sourceKey` holds the normalized pair under a sparse unique index, so two writes in the same instant can't both land. |
 | `voucher.institution`, `voucher.catalogNumber` | The specimen, as a collection names it. |
 | `collector`, `permit` | Restricted: read and changed only by the check you pass as `external.restrictedAccess`. Default nobody. |
 | `collectionDatePrecision` | `day`, `month`, `year` or `unknown`, for the sample's `collectedAt`. |
-| `dataLicense` | `cc0`, `cc-by`, `cc-by-nc`, `insdc`, `other` or `unknown`. Left out, it is `unknown`. |
+| `dataLicense` | `cc0`, `cc-by`, `cc-by-nc`, `insdc`, `other` or `unknown`. Left out, it is `unknown`. `other` and `unknown` both allow nothing. |
 | `dataLicenseNote`, `citation`, `doi` | The terms as written, and the paper or dataset. |
 | `url` | The source's own page. Readable only by the check you pass as `external.urlAccess`. Default nobody. |
 | `sourceRelease`, `importRun` | Relations to your own collections, added when you name them in `external.relations`. |
@@ -64,7 +64,7 @@ records: {
 }
 ```
 
-**The data license fails closed.** `unknown` means the record is a pointer to the source: no copy of its reads may be kept and nothing may be passed on, until a curator sets a real license. `licenseTerms(license)` gives the same answer to your own code (`keepCopy`, `redistribute`, `commercial`, `pointerOnly`); `other` keeps a copy and passes nothing on, because a person has to read the note.
+**The data license fails closed.** `unknown` means the record is a pointer to the source: no copy of its reads may be kept and nothing may be passed on, until a curator sets a real license. `other` gets the same answer: its terms are in `dataLicenseNote`, which only a person can read, and a check that can't decide says no. Once someone has read them, move the record to a real license. `licenseTerms(license)` gives the same answers to your own code (`keepCopy`, `redistribute`, `commercial`, `pointerOnly`).
 
 `rawReads[]` holds pointers to raw reads (an SRA run, a URL, your storage key), each with its SHA-256 and a `tier`: `external` (the source holds it), `cache` (a copy that may be cleared), `hot` or `deep-archive` (your own reads). An external sample's reads are `external`, or `cache` once its license allows a copy. An internal sample's reads are `hot` or `deep-archive`. The reads themselves are never stored here.
 

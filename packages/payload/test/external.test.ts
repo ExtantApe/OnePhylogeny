@@ -2,7 +2,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import { buildConfig, getPayload, type Field, type Payload } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { licenseTerms, onePhylogeny } from '../src/index.js'
+import { licenseTerms, onePhylogeny, sourceKeyOf } from '../src/index.js'
 import { recordCollections } from '../src/records.js'
 
 let payload: Payload
@@ -92,15 +92,80 @@ describe('origin', () => {
 })
 
 describe('accession and database', () => {
+  // The stored document, as the database holds it, so the tests see the hidden key and whether it is missing or null.
+  const stored = async (id: unknown) => (await (payload.db as unknown as { collections: Record<string, { findById: (id: unknown) => { lean: () => Promise<Record<string, unknown>> } }> }).collections.samples!.findById(id).lean()) as { external?: Record<string, unknown> }
+  const dup = /already records/
+
   it('are unique together where both are set, and a sample may keep its own', async () => {
     const first = await external({}, { accession: 'AB000001', database: 'GenBank' })
+    expect((await stored(first.id)).external?.sourceKey).toBe('genbank:ab000001')
     await expect(external({}, { accession: 'AB000001', database: 'GenBank' })).rejects.toThrow(/already records GenBank AB000001/)
     await expect(external({}, { accession: 'AB000001', database: 'ENA' })).resolves.toBeTruthy()
-    await expect(external({}, { accession: 'AB000001', database: null })).resolves.toBeTruthy()
-    await expect(external({}, { accession: 'AB000001', database: null })).resolves.toBeTruthy()
     await expect(update(first.id, { external: { citation: 'A corrected citation' } })).resolves.toMatchObject({ external: { accession: 'AB000001', citation: 'A corrected citation' } })
     const other = await external({}, { accession: 'AB000002', database: 'GenBank' })
     await expect(update(other.id, { external: { accession: 'AB000001' } })).rejects.toThrow(/already records GenBank AB000001/)
+    // A key sent by a client is replaced with the plugin's own.
+    const forged = await external({}, { accession: 'AB000003', database: 'GenBank', sourceKey: 'genbank:ab000001' })
+    expect((await stored(forged.id)).external?.sourceKey).toBe('genbank:ab000003')
+  })
+  it('leave the key unset when either part is blank, so blanks never collide', async () => {
+    const ids = [
+      await external({}, { accession: 'AB000001', database: null }),
+      await external({}, { accession: 'AB000001', database: null }),
+      await external({}, { accession: null, database: 'GenBank' }),
+      await external({}, { accession: null, database: 'GenBank' }),
+      await external({}, { sourceType: 'paper', accession: undefined, database: undefined }),
+      await external({}, { sourceType: 'paper', accession: '', database: '  ' }),
+    ].map((s) => s.id)
+    for (const id of ids) expect('sourceKey' in ((await stored(id)).external ?? {})).toBe(false)
+    expect(sourceKeyOf('GenBank', '')).toBeUndefined()
+    expect(sourceKeyOf(null, 'AB1')).toBeUndefined()
+  })
+  it('read the database and accession without regard to case or spacing', async () => {
+    await external({}, { accession: 'AB000010', database: 'GenBank' })
+    await expect(external({}, { accession: 'AB000010', database: 'genbank' })).rejects.toThrow(/already records genbank AB000010/)
+    await expect(external({}, { accession: 'ab000010', database: 'GENBANK' })).rejects.toThrow(dup)
+    await expect(external({}, { accession: ' AB 000010 ', database: ' Gen  Bank ' })).rejects.toThrow(dup)
+    expect(sourceKeyOf(' Gen  Bank ', ' ab 000010 ')).toBe('genbank:ab000010')
+    const s = await external({}, { accession: 'AB000011', database: 'GenBank' })
+    await expect(update(s.id, { external: { accession: 'ab000010' } })).rejects.toThrow(dup)
+  })
+  it('end concurrent creates of the same pair with exactly one saved, each refusal in plain words', async () => {
+    const same = { accession: 'AB000020', database: 'GenBank' }
+    const results = await Promise.allSettled([external({}, same), external({}, same), external({}, same)])
+    expect(results.filter((r) => r.status === 'fulfilled')).toHaveLength(1)
+    // Inside a MongoDB transaction the loser sees a write conflict, which names no key, so it is told a write collided
+    // and which pair it most likely was; a loser that reached the index itself gets the exact message.
+    for (const r of results) if (r.status === 'rejected') expect(String((r.reason as Error).message)).toMatch(/already records GenBank AB000020|most likely a sample with GenBank AB000020/)
+    const found = await payload.find({ collection: 'samples' as never, where: { 'external.sourceKey': { equals: 'genbank:ab000020' } } as never, overrideAccess: true })
+    expect(found.totalDocs).toBe(1)
+    // The retry meets the hook's check and the exact message.
+    await expect(external({}, same)).rejects.toThrow(/already records GenBank AB000020\. Edit that sample/)
+  })
+  it('have the index behind the hook, and its own refusal reads the same', async () => {
+    // Straight to the adapter, past the hook, so the index itself is what refuses the second write.
+    const raw = (ext: Record<string, unknown>) => payload.db.create({ collection: 'samples', data: { subject: animal, origin: 'external', external: { sourceType: 'public-database', ...ext } } })
+    await raw({ accession: 'AB000030', database: 'GenBank', sourceKey: 'genbank:ab000030' })
+    await expect(raw({ accession: 'AB000030', database: 'GenBank', sourceKey: 'genbank:ab000030' })).rejects.toThrow(/already records GenBank AB000030\. Edit that sample/)
+    // Any other unique field's refusal is left as Payload reports it.
+    await expect(payload.db.create({ collection: 'samples', data: { subject: animal, origin: 'external', external: { sourceType: 'paper' } } })).resolves.toBeTruthy()
+  })
+  it('drop the key when an update clears the accession, and never write an explicit null', async () => {
+    const a = await external({}, { accession: 'AB000040', database: 'GenBank' })
+    const b = await external({}, { accession: 'AB000041', database: 'GenBank' })
+    await update(a.id, { external: { accession: null } })
+    await update(b.id, { external: { accession: null } })
+    for (const s of [a, b]) {
+      const ext = (await stored(s.id)).external ?? {}
+      expect('sourceKey' in ext).toBe(false)
+      expect(ext.database).toBe('GenBank')
+    }
+    // The pair is free again once a sample lets it go.
+    await expect(external({}, { accession: 'AB000040', database: 'GenBank' })).resolves.toBeTruthy()
+    // An update that leaves the group alone keeps the key.
+    const c = await external({}, { accession: 'AB000042', database: 'GenBank' })
+    await update(c.id, { material: 'tissue' })
+    expect((await stored(c.id)).external?.sourceKey).toBe('genbank:ab000042')
   })
 })
 
@@ -144,12 +209,17 @@ describe('restricted fields', () => {
 })
 
 describe('data license', () => {
-  it('fails closed: unknown or unstated means pointer only', () => {
-    for (const l of ['unknown', undefined, null, 'made-up']) expect(licenseTerms(l)).toEqual({ keepCopy: false, redistribute: false, commercial: false, pointerOnly: true })
+  it('fails closed: unknown, unstated or other means pointer only', () => {
+    // `other` has terms only a person can read, so the plugin answers the same as for no license at all.
+    for (const l of ['unknown', 'other', undefined, null, 'made-up']) expect(licenseTerms(l)).toEqual({ keepCopy: false, redistribute: false, commercial: false, pointerOnly: true })
     expect(licenseTerms('cc0')).toEqual({ keepCopy: true, redistribute: true, commercial: true, pointerOnly: false })
     expect(licenseTerms('insdc').redistribute).toBe(true)
     expect(licenseTerms('cc-by-nc')).toMatchObject({ redistribute: true, commercial: false })
-    expect(licenseTerms('other')).toMatchObject({ keepCopy: true, redistribute: false, commercial: false })
+  })
+  it('refuses a cache copy under other, the same as under unknown', async () => {
+    const s = await external({}, { ...source(), dataLicense: 'other', dataLicenseNote: 'Made-up terms, see the paper.' })
+    await expect(update(s.id, { rawReads: [{ pointer: 'SRR000003', sha256: SHA, tier: 'cache' }] })).rejects.toThrow(/only a pointer/)
+    await expect(update(s.id, { rawReads: [{ pointer: 'SRR000003', sha256: SHA, tier: 'external' }] })).resolves.toBeTruthy()
   })
   it('is unknown when the source gives none, and then no copy of its reads may be kept', async () => {
     const s = await external()
