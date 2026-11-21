@@ -2,6 +2,15 @@
 
 Each audit lists what this repo promises, the tests that prove it, and the gaps: those closed in the same pass and those left, with why. Audits run after each feature or fix, and at least every 14 days while the repo has commits. Newest first.
 
+## 2026-11-21: external samples in the Payload plugin
+
+Captive Origins D5196, relayed. Payload tests went from 40 to 52 (`packages/payload/test/external.test.ts`, 12 new, with its own Payload instance; `records.test.ts` gains one assertion that a registered sample is `internal`).
+
+- **Promises:** `origin` is set once; an internal sample has `source` and no external group; an external sample has a source type and no kit, consent or `source`; accession and database are unique together; collector and permit are read and changed only by the host's `restrictedAccess`, the URL read only by its `urlAccess`, and both default to nobody; an unstated license is `unknown`, which allows no copy and no redistribution; read tiers follow the origin and the license; ecoregions carry dataset and version and match the host's pin; no coordinate enters a sample.
+- **Covered:** every rule above as a success and as a refusal with its wording; field reads as a restricted user (sees all), an admin (URL but not collector or permit) and a site's staff (none of the three), in `findByID` and `find`; an admin's attempt to change the collector leaves it unchanged while the restricted user's change lands; `recordCollections` with no checks refuses the restricted reads and updates to a privileged user and adds no `sourceRelease` field; `licenseTerms` for all six values and for nothing; cache under `unknown` refused, allowed after `cc-by`; a checksum normalized from `sha256:` upper case; relations to the host's source release and import run.
+- **Gaps left:** the admin `condition`s aren't rendered in tests. The uniqueness check reads outside the request's transaction (joining it broke the next transaction under mongodb-memory-server) and has no compound index behind it, so two writes in the same instant could both pass; a host that needs that guarantee adds its own index. Not run against a real import.
+- **Left out as overkill:** a test per admin description string; a test that `collectedAt` and `collectionDatePrecision` agree, since the plugin doesn't interpret the date.
+
 ## 2026-11-11: round connector joins
 
 Owner decision (2026-11-11): "A: round (Recommended)". Brand text and OnePhylogeny's two icon masters only; no package changed, so the workspace count is unchanged. The script tests (`node --test scripts/oneorigin.test.mjs`) gained one.
