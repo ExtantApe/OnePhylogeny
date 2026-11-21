@@ -1,6 +1,7 @@
 import { validateResult, type Result } from '@extantape/onephylogeny-core'
 import { relationship as validateRelationship } from 'payload/shared'
 import { either } from './access.js'
+import { withSourceKeyErrors } from './external.js'
 import { recordCollections, type RecordsOptions } from './records.js'
 import { APIError, type Access, type CollectionBeforeChangeHook, type CollectionAfterChangeHook, type CollectionConfig, type Config, type Endpoint, type Field, type Plugin, type Where } from 'payload'
 
@@ -36,6 +37,7 @@ export type OnePhylogenyPluginOptions = {
 
 export { either, anyOf } from './access.js'
 export { registerSequence, registerTrace, assignWaiting, readSingleSequence, readTrace, summarize, type RecordsOptions, type RegisterSequenceInput, type RegisterTraceInput, type TraceSummary, type Evaluate } from './records.js'
+export { licenseTerms, sourceKeyOf, DATA_LICENSES, SOURCE_TYPES, READ_TIERS, type DataLicense, type ExternalOptions, type EcoregionOptions, type EcoregionPin } from './external.js'
 
 const PANEL_TRANSITIONS: Record<string, string[]> = { candidate: ['active', 'withdrawn'], active: ['superseded', 'withdrawn'], superseded: ['withdrawn'], withdrawn: [] }
 const LOCKED_PANEL_FIELDS = ['key', 'version', 'marker', 'checksum', 'artifact', 'importRun', 'taxa', 'groups', 'notCovered', 'validatedScope']
@@ -242,6 +244,7 @@ export const onePhylogeny = (options: OnePhylogenyPluginOptions = {}): Plugin =>
 
   return {
     ...config,
+    ...(records ? { db: withSourceKeyErrors(config.db, records.config.samples) } : {}),
     collections: [...(config.collections ?? []), ...(records?.collections ?? []), panelCollection, assignmentCollection],
     endpoints: [...(config.endpoints ?? []), released],
     ...(records ? { custom: { ...config.custom, [records.customKey]: records.config } } : {}),
