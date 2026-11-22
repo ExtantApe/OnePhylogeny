@@ -2,6 +2,15 @@
 
 Each audit lists what this repo promises, the tests that prove it, and the gaps: those closed in the same pass and those left, with why. Audits run after each feature or fix, and at least every 14 days while the repo has commits. Newest first.
 
+## 2026-11-21: external samples on Postgres, and a GenBank import
+
+Follow-ups to the external samples change, closing three gaps its audit left. Payload tests went from 61 passing to 72, with 5 more that need a database and are skipped unless asked for (`pnpm test:postgres` in `packages/payload` starts and removes its own Postgres 17 container).
+
+- **Promises:** the accession and database pair is unique on Postgres as on MongoDB, with the same plain-words refusal; samples with no accession all save; clearing an accession frees the pair; `importGenBank` saves public records as external samples with an unknown license, a pointer and a checksum, takes the subject from the host, and reads no coordinate or place; a second run creates nothing and lists the duplicates; the admin shows each field for the right origin.
+- **Covered:** on Postgres (`test/external.postgres.test.ts`): no-accession samples stored as NULL, the duplicate refusal, case and spacing, 8 creates at once leaving one, the freed key, and a write the hook never saw refused by the index; the 23505 recognizer on hand-built errors, which always runs. On MongoDB (`test/import.test.ts`): five real public records save, the rerun, a `cache` copy refused, a `lat_lon` qualifier on an edited copy never reaching the document. `test/conditions.test.ts` covers the admin conditions as functions.
+- **Gaps left:** CI doesn't run the Postgres tests, to keep it free of Docker. A raw 23505 that Payload hasn't already converted was never seen from a real database. Not run on SQLite, behind a pooler, or on Postgres before 17. No live NCBI run and no large file. The admin wasn't looked at.
+- **Left out as overkill:** fetching from NCBI in tests; the fixture pins the records and its README gives the ids and checksum.
+
 ## 2026-11-21: external samples in the Payload plugin
 
 Owner decision of 2026-11-21, relayed. Payload tests went from 40 to 58 (`packages/payload/test/external.test.ts`, 18 new, with its own Payload instance on MongoDB; `records.test.ts` gains one assertion that a registered sample is `internal`). Six of the 18 came from the review of the first version: the accession index and `other` failing closed.
