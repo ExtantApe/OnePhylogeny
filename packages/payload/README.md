@@ -66,6 +66,8 @@ records: {
 
 **The data license fails closed.** `unknown` means the record is a pointer to the source: no copy of its reads may be kept and nothing may be passed on, until a curator sets a real license. `other` gets the same answer: its terms are in `dataLicenseNote`, which only a person can read, and a check that can't decide says no. Once someone has read them, move the record to a real license. `licenseTerms(license)` gives the same answers to your own code (`keepCopy`, `redistribute`, `commercial`, `pointerOnly`).
 
+The accession check works on MongoDB and Postgres. Its tests against Postgres skip unless asked: run `pnpm test:postgres` in `packages/payload` (needs Docker; it starts one throwaway container on 127.0.0.1 and removes it) or set `ONEPHYLOGENY_TEST_POSTGRES_URL` to an empty database. The Postgres adapter is a dev dependency only.
+
 `rawReads[]` holds pointers to raw reads (an SRA run, a URL, your storage key), each with its SHA-256 and a `tier`: `external` (the source holds it), `cache` (a copy that may be cleared), `hot` or `deep-archive` (your own reads). An external sample's reads are `external`, or `cache` once its license allows a copy. An internal sample's reads are `hot` or `deep-archive`. The reads themselves are never stored here.
 
 `ecoregion` is the most any page may show of where a sample came from, in three realms: `land`, `marine` and `freshwater`. Each value carries the dataset and version it came from, and a realm you pin in `ecoregions` refuses any other set. Precise localities never enter the plugin: a sample with a coordinate anywhere in it is refused. Keep them in your own collection, with your own audit.

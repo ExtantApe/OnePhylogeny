@@ -63,9 +63,18 @@ const SOURCE_KEY_PATH = /source[_.]?key$/i
 const duplicateMessage = (database: unknown, accession: unknown) => `Another sample already records ${String(database)} ${String(accession)}. Edit that sample instead of adding a second.`
 const collidedMessage = (database: unknown, accession: unknown) => `Another write landed in the same instant, most likely a sample with ${String(database)} ${String(accession)}. Try again: if that sample exists, you'll be told so.`
 
-/** A duplicate-key error from either adapter, which Payload reports as a validation error on the field. */
-const isDuplicateKey = (e: unknown): boolean =>
-  e instanceof ValidationError && Boolean((e.data as { errors?: { path?: string }[] } | undefined)?.errors?.some((f) => SOURCE_KEY_PATH.test(String(f.path ?? ''))))
+/**
+ * A duplicate-key error on the source key, from any adapter. Payload reports MongoDB's as a validation error on the field.
+ * Postgres's is SQLSTATE 23505, on the error or somewhere down its `cause` chain (drizzle wraps the driver's error), and
+ * the constraint, detail or message names the `source_key` column. Another column's unique violation is not ours.
+ */
+export const isDuplicateKey = (e: unknown): boolean => {
+  if (e instanceof ValidationError) return Boolean((e.data as { errors?: { path?: string }[] } | undefined)?.errors?.some((f) => SOURCE_KEY_PATH.test(String(f.path ?? ''))))
+  for (let err = e as { code?: unknown; constraint?: unknown; detail?: unknown; message?: unknown; cause?: unknown } | null, depth = 0; err && typeof err === 'object' && depth < 5; err = err.cause as typeof err, depth++) {
+    if (err.code === '23505') return [err.constraint, err.detail, err.message].some((v) => /source_?key/i.test(String(v ?? '')))
+  }
+  return false
+}
 /** MongoDB inside a transaction reports a clash with an uncommitted write as a write conflict, with no key named. */
 const isWriteConflict = (e: unknown): boolean => {
   const err = e as { code?: unknown; codeName?: unknown; message?: unknown } | null
@@ -223,7 +232,9 @@ export const sampleRules = (c: { samples: string; hasKit: boolean; ecoregions: E
     const key = sourceKeyOf(external.database, external.accession)
     const sent = { ...(data.external as Doc | undefined) }
     delete sent.sourceKey
-    data.external = key ? { ...sent, sourceKey: key } : sent
+    // Mongo drops an omitted key from the group. Postgres keeps the old column value, so a cleared accession must set it to NULL there.
+    const hadKey = operation === 'update' && hasValue((originalDoc?.external as Doc | undefined)?.sourceKey)
+    data.external = key ? { ...sent, sourceKey: key } : hadKey && req.payload.db.name !== 'mongoose' ? { ...sent, sourceKey: null } : sent
     if (key) {
       const where: Where = { and: [{ 'external.sourceKey': { equals: key } }, ...(operation === 'update' && originalDoc?.id != null ? [{ id: { not_equals: originalDoc.id } }] : [])] }
       const taken = await req.payload.find({ collection: c.samples as never, where, limit: 1, depth: 0, overrideAccess: true })
