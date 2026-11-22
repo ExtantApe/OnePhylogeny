@@ -512,12 +512,19 @@ function TreeTab({ profile, edit, platform, records, attempt, run, hasRun }: { p
   const [start, setStart] = useState('')
   const [end, setEnd] = useState('')
   useEffect(() => { void (platform.tools ? platform.tools.version('iqtree3').then(setVersion) : Promise.resolve(setVersion(null))) }, [platform])
-  const t = profile.tree!
+  const t = profile.tree
   const org = useMemo(() => new Map(records.map((r) => [r.version, r.organism ?? ''])), [records])
   const labelFor = (tip: string) => {
     const members = tree?.tips.find((x) => x.id === tip)?.members ?? []
     return members.length ? `${members[0]} ${org.get(members[0]!) ?? ''}${members.length > 1 ? ` +${members.length - 1}` : ''}` : tip
   }
+  if (!t) return (
+    <section className="pane form">
+      <h3>No tree settings yet</h3>
+      <p className="muted">This profile has no tree block, so there is nothing to build a tree from. Testing a sample doesn't need one. Add the default settings to choose a model and support values.</p>
+      <div className="actions"><button className="primary" onClick={() => edit({ ...profile, tree: { model: 'MFP', bootstrap: 1000, shAlrt: 1000, seed: 1, threads: 1 } })}>Add default tree settings</button></div>
+    </section>
+  )
   return (
     <section className="pane form">
       <p className="muted">A tree shows relationships as evidence for the panel. Testing a sample doesn't need one. {version ? `Using ${version}.` : ''}</p>

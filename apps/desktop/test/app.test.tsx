@@ -68,6 +68,16 @@ describe('the Mac app, clicked through', () => {
     expect(await screen.findByRole('heading', { name: 'Second species' })).toBeTruthy()
   })
 
+  it('shows an empty state in the Tree tab when the profile has no tree block', async () => {
+    const { tree: _tree, ...noTree } = profile
+    await platform.store.write(`profiles/${ID}/profile.json`, JSON.stringify(noTree))
+    await openProfile()
+    tab('Tree')
+    expect(await screen.findByText('No tree settings yet')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Add default tree settings' }))
+    expect(await screen.findByLabelText('Model')).toBeTruthy()
+  })
+
   it('offers the version comparison in the Panel tab as well as the Study tab', async () => {
     await openProfile()
     tab('Panel')
