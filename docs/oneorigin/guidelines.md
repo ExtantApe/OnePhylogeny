@@ -1,8 +1,8 @@
 # OneOrigin suite guidelines
 
-**Status: accepted by the owner on 2026-11-11 ("A: send it, accept guidelines (Recommended)").** Drafted 2026-11-04. These apply to OnePedigree, OneTaxonomy and OnePhylogeny, the [OneOrigin suite](README.md). The brand text that used to be hand-copied into each repo's `brand/README.md` now lives in [brand.md](brand.md), and the machine-readable values in [tokens.json](tokens.json). Each tool carries a locked copy of this folder (section 10).
+**Status: accepted by the owner on 2026-11-11 ("A: send it, accept guidelines (Recommended)").** Drafted 2026-11-04. These apply to the five tools of the [OneOrigin suite](README.md): OneTaxonomy, OneLineage, OnePhylogeny, OnePedigree and OneFamily. OneLineage is planned and has no repo yet. The brand text that used to be hand-copied into each repo's `brand/README.md` now lives in [brand.md](brand.md), and the machine-readable values in [tokens.json](tokens.json). Each tool carries a locked copy of this folder (section 10).
 
-They exist so the three tools feel like one suite and keep working together as they change, while each stays its own and none depends on another.
+They exist so the tools feel like one suite and keep working together as they change, while each stays its own and none depends on another.
 
 **How to read this.** "Must" is a rule a pull request can fail on. "Should" is the default, and leaving it takes a stated reason. Section 9 shows where each tool stands today.
 
@@ -12,7 +12,7 @@ They exist so the three tools feel like one suite and keep working together as t
 - **Not shared:** each tool's purpose, layout and science.
 - **Independence:** each tool must install, run and release alone. No tool's core may depend on another tool. Shared look is copied under each tool's own prefix, so no tool needs another to render.
 
-## 2. Principles all three keep
+## 2. Principles every tool keeps
 
 1. **Science and display are separate.** Data lives in immutable, checksummed records. Views only project it.
 2. **Unknown stays unknown.** Missing values are reported and never guessed. Absence isn't evidence.
@@ -194,7 +194,7 @@ Each decision with alternatives gets an ADR. Limitations are kept current, and n
 
 ### Licensing
 
-- **The three One tools and their plugins:** PolyForm Noncommercial 1.0.0, with a `Required Notice` line in each `LICENSE`.
+- **The One tools and their plugins:** PolyForm Noncommercial 1.0.0, with a `Required Notice` line in each `LICENSE`.
 - **General Payload plugins:** MIT.
 - **Third-party notices** ship with the code that uses it.
 - **Bundled programs** keep their own licenses and run as separate programs.
@@ -225,7 +225,7 @@ Each decision with alternatives gets an ADR. Limitations are kept current, and n
 
 ## 9. Parity today
 
-From a review of the three repos on 2026-11-04, updated on 2026-11-07 after the Mac releases and OnePhylogeny's first npm publish. Bold marks what remains.
+From a review of the first three repos on 2026-11-04, updated on 2026-11-07 after the Mac releases and OnePhylogeny's first npm publish. Bold marks what remains. OneFamily joined the suite on 2026-11-14 and hasn't been reviewed against this table yet, so it has no column; OneLineage gets one when its repo exists.
 
 | Area | OnePedigree | OneTaxonomy | OnePhylogeny |
 | --- | --- | --- | --- |
