@@ -1,0 +1,300 @@
+LOCUS       PQ562694                 719 bp    DNA     linear   VRT 08-DEC-2024
+DEFINITION  Chelonoidis carbonarius isolate EBTRFCCO5 cytochrome b (cytb) gene,
+            partial cds; mitochondrial.
+ACCESSION   PQ562694
+VERSION     PQ562694.1
+KEYWORDS    .
+SOURCE      mitochondrion Chelonoidis carbonarius (red-footed tortoise)
+  ORGANISM  Chelonoidis carbonarius
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Testudinata; Testudines; Cryptodira; Durocryptodira;
+            Testudinoidea; Testudinidae; Chelonoidis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     From captive to freedom: use of mitochondrial sequencing to guide
+            the management and release of captive turtles in Colombia
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-NOV-2024) Biology, Universidad Nacional de Colombia,
+            Ave Cra 30 #45-3, Bogota, Bogota 111321, Colombia
+COMMENT     ##Assembly-Data-START##
+            Sequencing Technology :: Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Chelonoidis carbonarius"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolate="EBTRFCCO5"
+                     /db_xref="taxon:50047"
+                     /geo_loc_name="Colombia"
+     gene            <1..>719
+                     /gene="cytb"
+     CDS             <1..>719
+                     /gene="cytb"
+                     /EC_number="7.1.1.8"
+                     /codon_start=1
+                     /transl_table=2
+                     /product="cytochrome b"
+                     /protein_id="XKW85935.1"
+                     /translation="VITNLLSAIPYIGNTLVQWIWGGFSVDNATLTRFFTFHFLLPFT
+                     IMGLAIVHLLFLHETGSNNPTGLNSNTDKIPFHPYFSYKDLLGLTLMLTLLLTLTLFS
+                     PNLLGDPDNFTPANPLSTPPHIKPEWYFLFAYAILRSIPNKLGGVLALLLSILVLFMM
+                     PTLHTSKQRSTMFRPLNQILLWCLMADLLMLTWIGGQPVENPFIIIGQMASILYFTIL
+                     LILMPMAGMIENKMLNLKYSS"
+ORIGIN      
+        1 gtcatcacca acctactttc agccattccc tacatcggca acaccctagt acaatgaatc
+       61 tgaggaggtt tctcagtaga caacgccacc ctgacccgct tctttacctt ccatttccta
+      121 ctacccttca ccatcatagg actagcaatc gtacacctac tcttcctcca cgagacagga
+      181 tcaaacaacc caacaggatt aaactcaaac accgataaaa ttcccttcca cccatacttc
+      241 tcctacaaag acttactagg actaacctta atactaaccc tactgttaac tctaacatta
+      301 ttctccccaa acctcctagg agatccagat aatttcacac cagccaaccc cctatcaact
+      361 ccacctcata ttaaaccaga atgatatttc ctattcgcct acgcaatcct tcgatccatc
+      421 ccaaacaaac taggaggcgt actcgccctt ctactctcca tcctagtact attcatgatg
+      481 ccaaccctac acacatcaaa acaacgttca actatatttc gacccttaaa ccaaattcta
+      541 ctctgatgcc taatagctga ccttctaata ctcacatgaa ttggaggcca accagtcgaa
+      601 aatccattca ttatcatcgg tcaaatagcc tctatcctat acttcaccat cctcctgatc
+      661 cttataccca tagcaggaat aattgaaaac aaaatactaa acttgaaata ttctagtag
+//
+LOCUS       PQ562693                 719 bp    DNA     linear   VRT 08-DEC-2024
+DEFINITION  Chelonoidis carbonarius isolate EBTRFCCO3 cytochrome b (cytb) gene,
+            partial cds; mitochondrial.
+ACCESSION   PQ562693
+VERSION     PQ562693.1
+KEYWORDS    .
+SOURCE      mitochondrion Chelonoidis carbonarius (red-footed tortoise)
+  ORGANISM  Chelonoidis carbonarius
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Testudinata; Testudines; Cryptodira; Durocryptodira;
+            Testudinoidea; Testudinidae; Chelonoidis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     From captive to freedom: use of mitochondrial sequencing to guide
+            the management and release of captive turtles in Colombia
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-NOV-2024) Biology, Universidad Nacional de Colombia,
+            Ave Cra 30 #45-3, Bogota, Bogota 111321, Colombia
+COMMENT     ##Assembly-Data-START##
+            Sequencing Technology :: Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Chelonoidis carbonarius"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolate="EBTRFCCO3"
+                     /db_xref="taxon:50047"
+                     /geo_loc_name="Colombia"
+     gene            <1..>719
+                     /gene="cytb"
+     CDS             <1..>719
+                     /gene="cytb"
+                     /EC_number="7.1.1.8"
+                     /codon_start=1
+                     /transl_table=2
+                     /product="cytochrome b"
+                     /protein_id="XKW85934.1"
+                     /translation="VITNLLSAIPYIGNTLVQWIWGGFSVDNATLTRFFTFHFLLPFT
+                     IMGLAIVHLLFLHETGSNNPTGLNSNTDKIPFHPYFSYKDLLGLTLMLTLLLTLTLFS
+                     PNLLGDPDNFTPANPLSTPPHIKPEWYFLFAYAILRSIPNKLGGVLALLLSILVLFMM
+                     PTLHTSKQRSTMFRPLNQILLWCLMADLLMLTWIGGQPVENPFIIIGQMASILYFTIL
+                     LILMPMAGMIENKMLNLKYSS"
+ORIGIN      
+        1 gtcatcacca acctactttc agccattccc tacatcggca acaccctagt acaatgaatc
+       61 tgaggaggtt tctcagtaga caacgccacc ctgacccgct tctttacctt ccatttccta
+      121 ctacccttca ccatcatagg actagcaatc gtacacctac tcttcctcca cgagacagga
+      181 tcaaacaacc caacaggatt aaactcaaac accgataaaa ttcccttcca cccatacttc
+      241 tcctacaaag acttactagg actaacctta atactaaccc tactgttaac tctaacatta
+      301 ttctccccaa acctcctagg agatccagat aatttcacac cagccaaccc cctatcaact
+      361 ccacctcata ttaaaccaga atgatatttc ctattcgcct acgcaatcct tcgatccatc
+      421 ccaaacaaac taggaggcgt actcgccctt ctactctcca tcctagtact attcatgatg
+      481 ccaaccctac acacatcaaa acaacgttca actatatttc gacccttaaa ccaaattcta
+      541 ctctgatgcc taatagctga ccttctaata ctcacatgaa ttggaggcca accagtcgaa
+      601 aatccattca ttatcatcgg tcaaatagcc tctatcctat acttcaccat cctcctgatc
+      661 cttataccca tagcaggaat aattgaaaac aaaatactaa acttgaaata ttctagtag
+//
+LOCUS       PQ562692                 719 bp    DNA     linear   VRT 08-DEC-2024
+DEFINITION  Chelonoidis carbonarius isolate EBTRFCCO2 cytochrome b (cytb) gene,
+            partial cds; mitochondrial.
+ACCESSION   PQ562692
+VERSION     PQ562692.1
+KEYWORDS    .
+SOURCE      mitochondrion Chelonoidis carbonarius (red-footed tortoise)
+  ORGANISM  Chelonoidis carbonarius
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Testudinata; Testudines; Cryptodira; Durocryptodira;
+            Testudinoidea; Testudinidae; Chelonoidis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     From captive to freedom: use of mitochondrial sequencing to guide
+            the management and release of captive turtles in Colombia
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-NOV-2024) Biology, Universidad Nacional de Colombia,
+            Ave Cra 30 #45-3, Bogota, Bogota 111321, Colombia
+COMMENT     ##Assembly-Data-START##
+            Sequencing Technology :: Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Chelonoidis carbonarius"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolate="EBTRFCCO2"
+                     /db_xref="taxon:50047"
+                     /geo_loc_name="Colombia"
+     gene            <1..>719
+                     /gene="cytb"
+     CDS             <1..>719
+                     /gene="cytb"
+                     /EC_number="7.1.1.8"
+                     /codon_start=1
+                     /transl_table=2
+                     /product="cytochrome b"
+                     /protein_id="XKW85933.1"
+                     /translation="VITNLLSAIPYIGNTLVQWIWGGFSVDNATLTRFFTFHFLLPFT
+                     IMGLAIVHLLFLHETGSNNPTGLNSNTDKIPFHPYFSYKDLLGLTLMLTLLLTLTLFS
+                     PNLLGDPDNFTPANPLSTPPHIKPEWYFLFAYAILRSIPNKLGGVLALLLSILVLFMM
+                     PTLHTSKQRSTMFRPLNQILLWCLMADLLMLTWIGGQPVENPFIIIGQMASILYFTIL
+                     LILMPMAGMIENKMLNLKYSS"
+ORIGIN      
+        1 gtcatcacca acctactttc agccattccc tacattggca acaccctagt acaatgaatc
+       61 tgaggaggtt tctcagtaga caacgccacc ctgactcgct tctttacctt ccatttccta
+      121 ctacccttca ccattatagg actagcaatc gtacacctac tcttcctcca cgagacagga
+      181 tcaaacaacc caacaggatt aaactcaaac accgataaaa ttccattcca cccatacttc
+      241 tcctacaaag acttattagg actaacctta atactaaccc tactgttaac tctaacatta
+      301 ttctccccaa acctcctagg agatccagat aacttcacac cagccaatcc cctatcaact
+      361 ccacctcata ttaaaccaga atgatatttc ctattcgcct atgcaatcct tcgatctatc
+      421 ccaaacaaac taggaggcgt actcgctctt ctactctcca tcctagtatt attcatgata
+      481 ccaaccctac acacatcaaa acaacgttca actatatttc gacccttaaa ccaaattcta
+      541 ctctgatgcc taatagctga ccttctaata ctcacatgaa ttggaggcca accagtcgaa
+      601 aatccattca ttatcattgg ccaaatagcc tctatcctat actttaccat cctcctaatc
+      661 cttataccca tagcaggaat aattgaaaac aaaatactaa acttaaaata ttctagtag
+//
+LOCUS       PQ562691                 719 bp    DNA     linear   VRT 08-DEC-2024
+DEFINITION  Chelonoidis carbonarius isolate EBTRFCCO1 cytochrome b (cytb) gene,
+            partial cds; mitochondrial.
+ACCESSION   PQ562691
+VERSION     PQ562691.1
+KEYWORDS    .
+SOURCE      mitochondrion Chelonoidis carbonarius (red-footed tortoise)
+  ORGANISM  Chelonoidis carbonarius
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Testudinata; Testudines; Cryptodira; Durocryptodira;
+            Testudinoidea; Testudinidae; Chelonoidis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     From captive to freedom: use of mitochondrial sequencing to guide
+            the management and release of captive turtles in Colombia
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-NOV-2024) Biology, Universidad Nacional de Colombia,
+            Ave Cra 30 #45-3, Bogota, Bogota 111321, Colombia
+COMMENT     ##Assembly-Data-START##
+            Sequencing Technology :: Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Chelonoidis carbonarius"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolate="EBTRFCCO1"
+                     /db_xref="taxon:50047"
+                     /geo_loc_name="Colombia"
+     gene            <1..>719
+                     /gene="cytb"
+     CDS             <1..>719
+                     /gene="cytb"
+                     /EC_number="7.1.1.8"
+                     /codon_start=1
+                     /transl_table=2
+                     /product="cytochrome b"
+                     /protein_id="XKW85932.1"
+                     /translation="VITNLLSAIPYIGNTLVQWIWGGFSVDNATLTRFFTFHFLLPFT
+                     IMGLAIVHLLFLHETGSNNPTGLNSNTDKIPFHPYFSYKDLLGLTLMLTLLLTLTLFS
+                     PNLLGDPDNFTPANPLSTPPHIKPEWYFLFAYAILRSIPNKLGGVLALLLSILVLFMM
+                     PTLHTSKQRSTMFRPLNQILLWCLMADLLMLTWIGGQPVENPFIIIGQMASILYFTIL
+                     LILMPMAGMIENKMLNLKYSS"
+ORIGIN      
+        1 gtcatcacca acctactttc agccattccc tacatcggca acaccctagt acaatgaatc
+       61 tgaggaggtt tctcagtaga caacgccacc ctgacccgct tctttacctt ccatttccta
+      121 ctacccttca ccatcatagg actagcaatc gtacacctac tcttcctcca cgagacagga
+      181 tcaaacaacc caacaggatt aaactcaaac accgataaaa ttcccttcca cccatacttc
+      241 tcctacaaag acttactagg actaacctta atactaaccc tactgttaac tctaacatta
+      301 ttctccccaa acctcctagg agatccagat aatttcacac cagccaaccc cctatcaact
+      361 ccacctcata ttaaaccaga atgatatttc ctattcgcct acgcaatcct tcgatccatc
+      421 ccaaacaaac taggaggcgt actcgccctt ctactctcca tcctagtact attcatgatg
+      481 ccaaccctac acacatcaaa acaacgttca actatatttc gacccttaaa ccaaattcta
+      541 ctctgatgcc taatagctga ccttctaata ctcacatgaa ttggaggcca accagtcgaa
+      601 aatccattca ttatcatcgg tcaaatagcc tctatcctat acttcaccat cctcctgatc
+      661 cttataccca tagcaggaat aattgaaaac aaaatactaa acttgaaata ttctagtag
+//
+LOCUS       PQ562690                 719 bp    DNA     linear   VRT 08-DEC-2024
+DEFINITION  Chelonoidis carbonarius isolate 963406 cytochrome b (cytb) gene,
+            partial cds; mitochondrial.
+ACCESSION   PQ562690
+VERSION     PQ562690.1
+KEYWORDS    .
+SOURCE      mitochondrion Chelonoidis carbonarius (red-footed tortoise)
+  ORGANISM  Chelonoidis carbonarius
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Archelosauria; Testudinata; Testudines; Cryptodira; Durocryptodira;
+            Testudinoidea; Testudinidae; Chelonoidis.
+REFERENCE   1  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     From captive to freedom: use of mitochondrial sequencing to guide
+            the management and release of captive turtles in Colombia
+  JOURNAL   Unpublished
+REFERENCE   2  (bases 1 to 719)
+  AUTHORS   Arias,L.A.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (04-NOV-2024) Biology, Universidad Nacional de Colombia,
+            Ave Cra 30 #45-3, Bogota, Bogota 111321, Colombia
+COMMENT     ##Assembly-Data-START##
+            Sequencing Technology :: Sanger dideoxy sequencing
+            ##Assembly-Data-END##
+FEATURES             Location/Qualifiers
+     source          1..719
+                     /organism="Chelonoidis carbonarius"
+                     /organelle="mitochondrion"
+                     /mol_type="genomic DNA"
+                     /isolate="963406"
+                     /db_xref="taxon:50047"
+                     /geo_loc_name="Colombia"
+     gene            <1..>719
+                     /gene="cytb"
+     CDS             <1..>719
+                     /gene="cytb"
+                     /EC_number="7.1.1.8"
+                     /codon_start=1
+                     /transl_table=2
+                     /product="cytochrome b"
+                     /protein_id="XKW85931.1"
+                     /translation="VITNLLSAIPYIGNTLVQWIWGGFSVDNATLTRFFTFHFLLPFT
+                     IMGLAIVHLLFLHETGSNNPTGLNSNTDKIPFHPYFSYKDLLGLTLMLALLLTLTLFS
+                     PNLLGDPDNFTPANPLSTPPHIKPEWYFLFAYAILRSIPNKLGGVLALLLSILVLFMM
+                     PTLHTSKQRSTMFRPLNQILLWCLMADLLMLTWIGGQPVENPFIIIGQMASILYFTIL
+                     LILMPMAGMIENKMLNLKYSS"
+ORIGIN      
+        1 gtcatcacca acctactttc agccattccc tacattggca acaccctagt acaatgaatc
+       61 tgaggaggtt tctcagtaga caacgccacc ctgactcgct tctttacctt ccatttccta
+      121 ctacccttca ccattatagg actagcaatc gtacacctac tcttcctcca cgagacagga
+      181 tcaaacaacc caacaggatt aaactcaaac accgataaaa ttccattcca cccatacttc
+      241 tcctacaaag acttattagg actaacctta atactagccc tactgttaac tctaacatta
+      301 ttctccccaa acctcctagg agatccagat aacttcacac cagccaatcc cctatcaact
+      361 ccacctcata ttaaaccaga atgatatttc ctattcgcct atgcaatcct tcgatctatc
+      421 ccaaacaaac taggaggcgt actcgctctt ctactctcca tcctagtatt attcatgata
+      481 ccaaccctac acacatcaaa acaacgttca actatatttc gacccttaaa ccaaatccta
+      541 ctctgatgcc taatagctga ccttctaata ctcacatgaa ttggaggcca accagtcgaa
+      601 aatccattca ttatcattgg ccaaatagcc tctatcctat actttaccat cctcctaatc
+      661 cttataccca tagcaggaat aattgaaaac aaaatactaa acttaaaata ttctagtag
+//

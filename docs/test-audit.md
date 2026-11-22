@@ -2,6 +2,24 @@
 
 Each audit lists what this repo promises, the tests that prove it, and the gaps: those closed in the same pass and those left, with why. Audits run after each feature or fix, and at least every 14 days while the repo has commits. Newest first.
 
+## 2026-11-22: the GenBank import after review
+
+Changes asked for in the review of the import, each with its proof. Payload tests went from 72 passing to 80, with 6 skipped unless a Postgres is asked for (was 5).
+
+- **Promises:** with `req`, the import runs as that user, and a user who may not create samples saves nothing; without `req` it runs with full access, which the docs now say; text that reads like a coordinate is refused anywhere in a sample, and nothing of such a record can be read; the NCBI link is stored in `url` alone, under `urlAccess`, and the pointer is the versioned accession; a direct-submission citation carries no postal address; the duplicate recognizer takes only the plugin's own column; the Postgres URL route refuses a database that already holds tables.
+- **Covered** (`test/import.test.ts`): an anonymous request and a reader get every record back under `failed` and nothing is stored; a curator saves them, and the rerun names the duplicates; a reader sees the pointer and no link anywhere in the documents, while full access sees the link in `url` only; a voucher `UF:Herp:4.61 N 74.08 W Bogota` and a title with the same text are refused naming the field, a reader finds nothing of them, and a read with no user is refused; the lower-case direct-submission citation is authors and title alone. `looksLikeCoordinates` has positives and negatives (catalog numbers, dates, page ranges, checksums, prose). `test/external.postgres.test.ts`: `resource_key`, `data_source_key` and a bare `source_key` are not ours, `external_source_key` is; on Postgres, the empty-database check refuses the database once the schema is in it.
+- **Gaps left:** coordinates written in words or split across fields. The country claim is no longer made, so nothing tests it. A killed Postgres run leaving its container behind is documented and has no test.
+- **Left out as overkill:** a test that the image digest matches the registry; it is a pinned string, and a pull failure says so.
+
+## 2026-11-21: external samples on Postgres, and a GenBank import
+
+Follow-ups to the external samples change, closing three gaps its audit left. Payload tests went from 61 passing to 72, with 5 more that need a database and are skipped unless asked for (`pnpm test:postgres` in `packages/payload` starts and removes its own Postgres 17 container).
+
+- **Promises:** the accession and database pair is unique on Postgres as on MongoDB, with the same plain-words refusal; samples with no accession all save; clearing an accession frees the pair; `importGenBank` saves public records as external samples with an unknown license, a pointer and a checksum, takes the subject from the host, and reads no coordinate or place; a second run creates nothing and lists the duplicates; the admin shows each field for the right origin.
+- **Covered:** on Postgres (`test/external.postgres.test.ts`): no-accession samples stored as NULL, the duplicate refusal, case and spacing, 8 creates at once leaving one, the freed key, and a write the hook never saw refused by the index; the 23505 recognizer on hand-built errors, which always runs. On MongoDB (`test/import.test.ts`): five real public records save, the rerun, a `cache` copy refused, a `lat_lon` qualifier on an edited copy never reaching the document. `test/conditions.test.ts` covers the admin conditions as functions.
+- **Gaps left:** CI doesn't run the Postgres tests, to keep it free of Docker. A raw 23505 that Payload hasn't already converted was never seen from a real database. Not run on SQLite, behind a pooler, or on Postgres before 17. No live NCBI run and no large file. The admin wasn't looked at.
+- **Left out as overkill:** fetching from NCBI in tests; the fixture pins the records and its README gives the ids and checksum.
+
 ## 2026-11-21: identity match statistics in core
 
 Owner decisions of 2026-11-19 and 2026-11-21, relayed (a mitochondrial match means the same maternal line only; hosts need match statistics for samples that may be one animal). Core tests went from 339 to 364 (`packages/core/test/identity.test.ts`, 25 new, made-up seeded data).

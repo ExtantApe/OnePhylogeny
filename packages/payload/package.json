@@ -38,6 +38,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean --target es2022",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:postgres": "ONEPHYLOGENY_TEST_DOCKER=1 vitest run test/external.postgres.test.ts",
     "prepack": "pnpm run build"
   },
   "dependencies": {
@@ -48,9 +49,12 @@
   },
   "devDependencies": {
     "@payloadcms/db-mongodb": "3.92.1",
+    "@payloadcms/db-postgres": "3.92.1",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.20.0",
     "graphql": "^16.14.2",
     "mongodb-memory-server": "^11.3.0",
     "payload": "^3.92.1",
-    "@types/node": "^24.19.2"
+    "pg": "^8.20.0"
   }
 }
