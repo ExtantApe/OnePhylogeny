@@ -67,7 +67,7 @@ describe('registerSequence', () => {
   it('records a sample and a sequence, with the species taken from the animal', async () => {
     const { sample, sequence, created } = await register()
     expect(created).toBe(true)
-    expect(sample).toMatchObject({ subject: animal, taxon, source: 'kit', tenant: 'site-1' })
+    expect(sample).toMatchObject({ subject: animal, taxon, origin: 'internal', source: 'kit', tenant: 'site-1' })
     expect(sequence).toMatchObject({ sample: sample.id, marker: 'cytb', lab, status: 'received', length: BASES.length, recordId: 'K0001', tenant: 'site-1' })
   })
   it('changes nothing when the same file comes again, and adds a re-run as a second sequence on the same sample', async () => {

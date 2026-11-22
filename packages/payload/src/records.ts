@@ -1,4 +1,5 @@
 import { anyOf } from './access.js'
+import { externalFields, sampleRules, whenInternal, type EcoregionOptions, type ExternalOptions } from './external.js'
 import { assessRead, ChromatogramError, parseFasta, readAbif, sha256Hex, sha256HexBytes, type Result } from '@extantape/onephylogeny-core'
 import { APIError, type Access, type CollectionBeforeChangeHook, type CollectionConfig, type Field, type Payload, type PayloadRequest, type Where } from 'payload'
 
@@ -13,6 +14,13 @@ export type RecordsOptions = {
   markers?: Record<string, { minLength?: number; maxLength?: number }>
   /** The host's tenant field, filled from `registerSequence`'s `tenant` and copied onto results. Default `tenant`. */
   tenantField?: string
+  /**
+   * Samples from outside the host (papers, public databases, validated panels, institutions). The fields are always
+   * added; this sets who may read the restricted ones, which default to nobody, and which host collections they relate to.
+   */
+  external?: ExternalOptions
+  /** The ecoregion sets this host uses, one per realm, each pinned by version. Default: none pinned. */
+  ecoregions?: EcoregionOptions
 }
 
 export type RecordsConfig = {
@@ -62,21 +70,29 @@ export function recordCollections(o: RecordsOptions, base: { panels: string; ass
   const access = { read, create: manage, update: manage, delete: () => false }
   const tenantField = o.tenantField ?? 'tenant'
 
+  const ext = externalFields(o.external ?? {})
   const sampleCollection: CollectionConfig = {
     slug: samples,
     labels: { singular: 'Sample', plural: 'Samples' },
-    admin: { group: 'Genetics', defaultColumns: ['subject', 'source', 'kit', 'createdAt'] },
+    admin: { group: 'Genetics', defaultColumns: ['subject', 'origin', 'source', 'kit', 'createdAt'] },
     access,
     fields: [
       ...relation('subject', base.subject, { required: true }),
-      ...relation('kit', o.relations?.kit),
+      ext.origin,
+      ...relation('kit', o.relations?.kit, { admin: { condition: whenInternal } } as Partial<Field>),
       ...relation('taxon', base.taxa),
-      { name: 'source', type: 'select', required: true, defaultValue: 'kit', options: ['kit', 'upload', 'historic'] },
+      { name: 'source', type: 'select', options: ['kit', 'upload', 'historic'], admin: { condition: whenInternal, description: 'How the host\'s own material arrived. Internal samples only.' } },
       { name: 'material', type: 'text', admin: { description: 'What was sampled, such as a shell scrape or blood.' } },
-      { name: 'collectedAt', type: 'date' },
-      { name: 'consent', type: 'text', admin: { description: 'The keeper\'s consent, as recorded with the kit or upload.' } },
+      { name: 'collectedAt', type: 'date', admin: { description: 'For an external sample, see collectionDatePrecision for how much of it to trust.' } },
+      { name: 'consent', type: 'text', admin: { condition: whenInternal, description: 'The keeper\'s consent, as recorded with the kit or upload. Internal samples only.' } },
+      ext.external,
+      ext.rawReads,
+      ext.ecoregion,
     ],
-    hooks: { beforeChange: [locked(['subject', 'kit', 'source', tenantField], 'A sample\'s animal, kit, source and site can\'t change. Record a new sample instead.')] },
+    hooks: { beforeChange: [
+      locked(['subject', 'kit', 'source', 'origin', tenantField], 'A sample\'s animal, kit, source, origin and site can\'t change. Record a new sample instead.'),
+      sampleRules({ samples, hasKit: Boolean(o.relations?.kit), ecoregions: o.ecoregions ?? {} }),
+    ] },
   }
 
   const sequenceCollection: CollectionConfig = {
