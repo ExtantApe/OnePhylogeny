@@ -3,10 +3,11 @@ import { buildConfig, getPayload, ValidationError, type Payload } from 'payload'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { onePhylogeny } from '../src/index.js'
 import { isDuplicateKey } from '../src/external.js'
-import { postgresRoute, startPostgres, type Postgres } from './support/postgres.js'
+import { assertEmptyDatabase, postgresRoute, startPostgres, type Postgres } from './support/postgres.js'
 
 // Run against a real Postgres with ONEPHYLOGENY_TEST_DOCKER=1 (starts and removes its own container) or
-// ONEPHYLOGENY_TEST_POSTGRES_URL=postgres://... (an empty throwaway database). Otherwise these skip.
+// ONEPHYLOGENY_TEST_POSTGRES_URL=postgres://... (an empty throwaway database; one that already holds tables is refused,
+// because the tests push the schema into it). Otherwise these skip.
 const real = postgresRoute === 'none' ? describe.skip : describe
 
 describe('duplicate-key recognition (no database)', () => {
@@ -22,6 +23,15 @@ describe('duplicate-key recognition (no database)', () => {
     expect(isDuplicateKey(new Error('boom'))).toBe(false)
     expect(isDuplicateKey(null)).toBe(false)
     expect(isDuplicateKey(Object.assign(new Error('Failed query'), { cause: undefined }))).toBe(false)
+  })
+  it('does not take a host column that merely ends in source_key for the plugin\'s own', () => {
+    for (const column of ['resource_key', 'data_source_key', 'source_key', 'sourceKey']) {
+      expect(isDuplicateKey(on({ code: '23505', constraint: `things_${column}_idx`, detail: `Key (${column})=(x) already exists.`, message: `duplicate key value violates unique constraint "things_${column}_idx"` })), column).toBe(false)
+    }
+    expect(isDuplicateKey(on({ code: '23505', constraint: undefined, detail: 'Key (external_source_key)=(genbank:x) already exists.' }))).toBe(true)
+    expect(isDuplicateKey(new ValidationError({ errors: [{ message: 'Value must be unique', path: 'resource.sourceKey' }] }))).toBe(false)
+    expect(isDuplicateKey(new ValidationError({ errors: [{ message: 'Value must be unique', path: 'sourceKey' }] }))).toBe(false)
+    expect(isDuplicateKey(new ValidationError({ errors: [{ message: 'Value must be unique', path: 'external_source_key' }] }))).toBe(true)
   })
   it('keeps recognizing the validation error Payload makes from a duplicate key', () => {
     expect(isDuplicateKey(new ValidationError({ errors: [{ message: 'Value must be unique', path: 'external.sourceKey' }] }))).toBe(true)
@@ -94,5 +104,8 @@ real('accession uniqueness on Postgres', () => {
     expect(await count('genbank:pg000005')).toBe(0)
     expect((await rows('select external_source_key as k from samples where id = $1', [first.id]))[0]!.k).toBeNull()
     await expect(create({ database: 'GenBank', accession: 'PG000005' })).resolves.toBeTruthy()
+  })
+  it('would refuse this database, now that it holds tables, if it were handed over by URL', async () => {
+    await expect(assertEmptyDatabase(pg.url)).rejects.toThrow(/already holds \d+ table/)
   })
 })

@@ -66,20 +66,26 @@ records: {
 
 **The data license fails closed.** `unknown` means the record is a pointer to the source: no copy of its reads may be kept and nothing may be passed on, until a curator sets a real license. `other` gets the same answer: its terms are in `dataLicenseNote`, which only a person can read, and a check that can't decide says no. Once someone has read them, move the record to a real license. `licenseTerms(license)` gives the same answers to your own code (`keepCopy`, `redistribute`, `commercial`, `pointerOnly`).
 
-The accession check works on MongoDB and Postgres. Its tests against Postgres skip unless asked: run `pnpm test:postgres` in `packages/payload` (needs Docker; it starts one throwaway container on 127.0.0.1 and removes it) or set `ONEPHYLOGENY_TEST_POSTGRES_URL` to an empty database. The Postgres adapter is a dev dependency only.
+The accession check works on MongoDB and Postgres. Its tests against Postgres skip unless asked: run `pnpm test:postgres` in `packages/payload` (needs Docker; it starts one throwaway Postgres 17 container, pinned by image digest, on 127.0.0.1 and removes it; a run killed part way leaves the container for you to remove) or set `ONEPHYLOGENY_TEST_POSTGRES_URL` to an empty throwaway database. The tests push their schema into that database, so one that already holds a table is refused. The Postgres adapter is a dev dependency only.
 
 `rawReads[]` holds pointers to raw reads (an SRA run, a URL, your storage key), each with its SHA-256 and a `tier`: `external` (the source holds it), `cache` (a copy that may be cleared), `hot` or `deep-archive` (your own reads). An external sample's reads are `external`, or `cache` once its license allows a copy. An internal sample's reads are `hot` or `deep-archive`. The reads themselves are never stored here.
 
-`ecoregion` is the most any page may show of where a sample came from, in three realms: `land`, `marine` and `freshwater`. Each value carries the dataset and version it came from, and a realm you pin in `ecoregions` refuses any other set. Precise localities never enter the plugin: a sample with a coordinate anywhere in it is refused. Keep them in your own collection, with your own audit.
+`ecoregion` is the most any page may show of where a sample came from, in three realms: `land`, `marine` and `freshwater`. Each value carries the dataset and version it came from, and a realm you pin in `ecoregions` refuses any other set. Precise localities never enter the plugin: a sample with a coordinate anywhere in it is refused, whether as a field named for one (`lat`, `lon`, `coordinates` and the like) or as text that reads like one in any field (`4.61 N 74.08 W`, `4°36'35"N`, `4.6097, -74.0817`). The refusal names the field. `looksLikeCoordinates(text)` is the same check, for your own code. Keep localities in your own collection, with your own audit.
 
 ### Importing GenBank records
 
 ```ts
 import { importGenBank } from '@extantape/payload-plugin-onephylogeny'
 
-const report = await importGenBank(payload, genBankText, { subject: referenceSubjectId })
+const report = await importGenBank(payload, genBankText, { subject: referenceSubjectId, req })
 // { created: [{ accession, id }], duplicates: [{ accession, id }], failed: [{ accession, reason }] }
 ```
 
-Each record becomes an external sample: `public-database`, `GenBank`, the accession without its version, the voucher, collector and date precision where the record gives them, its citation, a link to the record, and a `rawReads` pointer checked by the sequence's SHA-256. GenBank states no license, so `dataLicense` is `unknown` and only a pointer is kept; `tier: 'cache'` is refused. `subject` is yours, an id or a function of the record: the plugin doesn't decide what a reference record is. `lat_lon` and the place text are never read, so no coordinate and no country is stored. Running it twice makes nothing new and lists the accessions already held. `genBankToExternalSample(record)` does the mapping alone. The test fixture is five real public records in `fixtures/external/`.
+Each record becomes an external sample: `public-database`, `GenBank`, the accession without its version, the voucher, collector and date precision where the record gives them, its citation, a link to the record in `url` (so your `urlAccess` rule governs it), and a `rawReads` pointer that names the versioned accession (`PQ562694.1`), checked by the sequence's SHA-256. GenBank states no license, so `dataLicense` is `unknown` and only a pointer is kept; `tier: 'cache'` is refused. `subject` is yours, an id or a function of the record: the plugin doesn't decide what a reference record is.
+
+**Access.** Pass `req` (the request of the person importing) and every read and write runs as that user, under your access rules: a user who may not create samples gets each record back under `failed`, and `duplicates` names only samples they may read. Without `req` the import runs with full access, like any Local API job, so it belongs only in trusted server code that has already checked who is asking. Never wire it to an upload or a request without `req`.
+
+**Place.** The importer never reads `lat_lon`, `geo_loc_name` or `country`, so no place qualifier reaches a sample. A reference title or citation keeps the words its authors wrote, which may name a country. A voucher or citation whose text reads like a coordinate is refused, like any other sample, and lands under `failed`. When a record's only reference is its direct submission, the citation is the authors and title alone, because the JOURNAL line there is the submitter's postal address.
+
+Running it twice makes nothing new and lists the accessions already held. `genBankToExternalSample(record)` does the mapping alone. The test fixture is five real public records in `fixtures/external/`.
 

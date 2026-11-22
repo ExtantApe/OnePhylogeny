@@ -208,6 +208,9 @@ importers:
       '@types/node':
         specifier: ^24.19.2
         version: 24.19.2
+      '@types/pg':
+        specifier: ^8.20.0
+        version: 8.20.0
       graphql:
         specifier: ^16.14.2
         version: 16.14.2
@@ -217,6 +220,9 @@ importers:
       payload:
         specifier: ^3.92.1
         version: 3.92.1(graphql@16.14.2)(typescript@5.9.3)
+      pg:
+        specifier: ^8.20.0
+        version: 8.20.0
 
   packages/react:
     dependencies:

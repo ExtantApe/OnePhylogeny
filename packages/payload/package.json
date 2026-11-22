@@ -51,8 +51,10 @@
     "@payloadcms/db-mongodb": "3.92.1",
     "@payloadcms/db-postgres": "3.92.1",
     "@types/node": "^24.19.2",
+    "@types/pg": "^8.20.0",
     "graphql": "^16.14.2",
     "mongodb-memory-server": "^11.3.0",
-    "payload": "^3.92.1"
+    "payload": "^3.92.1",
+    "pg": "^8.20.0"
   }
 }

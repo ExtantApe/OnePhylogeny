@@ -59,19 +59,24 @@ const normalize = (v: unknown): string => String(v).replace(/\s+/g, '').toLowerC
 export const sourceKeyOf = (database: unknown, accession: unknown): string | undefined =>
   hasValue(database) && hasValue(accession) ? `${normalize(database)}:${normalize(accession)}` : undefined
 
-const SOURCE_KEY_PATH = /source[_.]?key$/i
-const duplicateMessage = (database: unknown, accession: unknown) => `Another sample already records ${String(database)} ${String(accession)}. Edit that sample instead of adding a second.`
+// The plugin's own key only: `external.sourceKey` (or the column spelling `external_source_key`, which Payload reports on
+// Postgres) in a validation error, and `external_source_key` in a Postgres constraint such as
+// `samples_external_source_key_idx` or a detail line. A host's `resource_key` or `data_source_key` is not ours.
+const SOURCE_KEY_PATH = /(^|[._])external[._]source_?key$/i
+const SOURCE_KEY_COLUMN = /external_source_key/i
+/** The plain refusal for a second sample of one database and accession, shared with the importer. */
+export const duplicateMessage = (database: unknown, accession: unknown) => `Another sample already records ${String(database)} ${String(accession)}. Edit that sample instead of adding a second.`
 const collidedMessage = (database: unknown, accession: unknown) => `Another write landed in the same instant, most likely a sample with ${String(database)} ${String(accession)}. Try again: if that sample exists, you'll be told so.`
 
 /**
  * A duplicate-key error on the source key, from any adapter. Payload reports MongoDB's as a validation error on the field.
  * Postgres's is SQLSTATE 23505, on the error or somewhere down its `cause` chain (drizzle wraps the driver's error), and
- * the constraint, detail or message names the `source_key` column. Another column's unique violation is not ours.
+ * the constraint, detail or message names the `external_source_key` column. Another column's unique violation is not ours.
  */
 export const isDuplicateKey = (e: unknown): boolean => {
   if (e instanceof ValidationError) return Boolean((e.data as { errors?: { path?: string }[] } | undefined)?.errors?.some((f) => SOURCE_KEY_PATH.test(String(f.path ?? ''))))
   for (let err = e as { code?: unknown; constraint?: unknown; detail?: unknown; message?: unknown; cause?: unknown } | null, depth = 0; err && typeof err === 'object' && depth < 5; err = err.cause as typeof err, depth++) {
-    if (err.code === '23505') return [err.constraint, err.detail, err.message].some((v) => /source_?key/i.test(String(v ?? '')))
+    if (err.code === '23505') return [err.constraint, err.detail, err.message].some((v) => SOURCE_KEY_COLUMN.test(String(v ?? '')))
   }
   return false
 }
@@ -128,10 +133,43 @@ export const hasValue = (v: unknown): boolean => {
   return true
 }
 
-const hasCoordinates = (value: unknown): boolean => {
-  if (Array.isArray(value)) return value.some(hasCoordinates)
-  if (!value || typeof value !== 'object') return false
-  return Object.entries(value as Record<string, unknown>).some(([k, v]) => COORDINATES.test(k) || hasCoordinates(v))
+// A degree value with an optional sign and decimals, as it appears in text: 4.61, -74.08, 4, 74.0817.
+const DEG = String.raw`-?\d{1,3}(?:\.\d+)?`
+const COORDINATE_TEXT = [
+  // Decimal degrees with hemispheres: 4.61 N 74.08 W, 4.61N, 74.08W, 4.61° S, 74.08° E.
+  new RegExp(String.raw`(?<![\w.])${DEG}\s*[°º]?\s*[NS]\b[\s,;/]*${DEG}\s*[°º]?\s*[EW]\b`, 'i'),
+  // Hemisphere first: N 4.61 W 74.08, N4.61, W74.08.
+  new RegExp(String.raw`\b[NS]\s*${DEG}\s*[°º]?[\s,;/]*[EW]\s*${DEG}(?![\w.])`, 'i'),
+  // Degrees and minutes, with or without seconds, and a hemisphere: 4°36'35"N, 74° 04.9' W.
+  new RegExp(String.raw`\d{1,3}\s*[°º]\s*\d{1,2}(?:\.\d+)?\s*['′’]\s*(?:\d{1,2}(?:\.\d+)?\s*["″”]\s*)?[NSEW]\b`, 'i'),
+]
+// A plain decimal pair with at least two decimals each (4.6097, -74.0817 or 4.6097 -74.0817), checked for range below.
+const DECIMAL_PAIR = /(?<![\w.-])(-?\d{1,2}\.\d{2,})(?:\s*,\s*|\s+)(-?\d{1,3}\.\d{2,})(?![\w.])/
+
+/**
+ * True when free text reads like a coordinate: a decimal or degree-minute pair with hemisphere letters, or a plain
+ * decimal pair in the range of a latitude and longitude. A catalog number, a date, a page range or a checksum is not one.
+ * Tight on purpose: it refuses what is plainly a position, so a sample's text can't carry a locality past the field
+ * names, and leaves ordinary numbers alone.
+ */
+export const looksLikeCoordinates = (text: string): boolean => {
+  if (COORDINATE_TEXT.some((re) => re.test(text))) return true
+  const pair = DECIMAL_PAIR.exec(text)
+  return pair !== null && Math.abs(Number(pair[1])) <= 90 && Math.abs(Number(pair[2])) <= 180
+}
+
+/** The path of the first field that holds a coordinate, by its name or by text that reads like one, or undefined. */
+const findCoordinate = (value: unknown, path = ''): string | undefined => {
+  if (typeof value === 'string') return looksLikeCoordinates(value) ? path : undefined
+  if (Array.isArray(value)) { for (const [i, v] of value.entries()) { const hit = findCoordinate(v, `${path}[${i}]`); if (hit !== undefined) return hit } return undefined }
+  if (!value || typeof value !== 'object' || value instanceof Date) return undefined
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    const at = path ? `${path}.${k}` : k
+    if (COORDINATES.test(k)) return at
+    const hit = findCoordinate(v, at)
+    if (hit !== undefined) return hit
+  }
+  return undefined
 }
 
 const whenExternal = { condition: ((data) => data?.origin === 'external') as Condition }
@@ -212,7 +250,8 @@ const group = (doc: Doc | undefined, data: Doc, name: string): Doc => ({ ...((do
  * be after the change, so an edit can't slip a field past a rule by leaving the rest of the group alone.
  */
 export const sampleRules = (c: { samples: string; hasKit: boolean; ecoregions: EcoregionOptions }): CollectionBeforeChangeHook => async ({ data, originalDoc, operation, req }) => {
-  if (hasCoordinates(data)) fail('Samples never hold coordinates. Keep precise localities in your own collection, outside the plugin.')
+  const coordinate = findCoordinate(data)
+  if (coordinate !== undefined) fail(`Samples never hold coordinates, and ${coordinate || 'this sample'} holds one or reads like one. Keep precise localities in your own collection, outside the plugin.`)
   const doc = { ...(originalDoc as Doc | undefined), ...data } as Doc
   const origin = String(doc.origin ?? 'internal')
   const external = group(originalDoc, data, 'external')
