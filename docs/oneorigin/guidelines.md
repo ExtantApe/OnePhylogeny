@@ -28,6 +28,27 @@ They exist so the three tools feel like one suite and keep working together as t
 
 The OneOrigin palette and the six marks (the suite, OneTaxonomy, OneLineage, OnePhylogeny, OnePedigree and OneFamily) are in [brand.md](brand.md#palette), with the files in `marks/` and the values in `palette` in `tokens.json`. Approved by the owner on 2026-11-12. Use a tool's text color for text in its color, never the base. Draw the one in teal with its cream center, every time.
 
+### Using the marks
+
+These apply wherever a mark appears: READMEs, sites, slides, cards and social images. The app icons follow their own rules below. Added 2026-11-22 (K694).
+
+- **The art stays as drawn.** Must use the files in `marks/` unchanged. Don't recolor, redraw, stretch, rotate, crop or outline them, and don't add shadows or effects. Scale only, keeping the square.
+- **Light or dark.** Must use the light version on white and other light backgrounds, and the dark version on dark ones. Choose by the lines: the light version's aubergine `#363051` must reach at least 3:1 against the background, and the dark version's pale `#ece6f2` the same. Both were checked on white and on `#1c1820`.
+- **Plain backgrounds only.** Don't put a mark straight onto a tool color, a gradient or a photo, where some of its nodes would disappear. Put a plain light or dark panel behind it first, with the clear space below inside the panel.
+- **Clear space.** Measure from the edge of the mark's square, not from the drawing, because the drawings fill their squares unevenly. Keep at least a quarter of the mark's width clear on every side, so 24 px around a 96 px mark, with no text, other logos or edges inside it.
+- **Sizes.** Must not show a mark smaller than the table allows: below that the nodes run together. For favicons, menu bars and file lists, use the app's `brand/icon-small.svg` instead. In print, keep marks at least 10 mm wide.
+
+| Width on screen | On light backgrounds | On dark backgrounds |
+| --- | --- | --- |
+| Over 48 px | Light | Dark |
+| 32 to 48 px | Small | Dark |
+| 24 to 31 px | Small | None: too small |
+| Under 24 px | None: too small | None: too small |
+
+- **Several marks together.** Show them at the same size, each in its own square, lined up by the squares with the clear space between them. Don't recenter a drawing inside its square. Order them by the zoom chain: OneTaxonomy, OneLineage, OnePhylogeny, OnePedigree, OneFamily, with the suite mark first or above them when it appears.
+- **Names beside marks.** Set a tool's name in the line color (aubergine on light, pale on dark) or in that tool's text color, never in its base color.
+- **Alt text.** When the tool's name is next to the mark, give the image empty alt text so screen readers don't say the name twice. A mark standing alone takes the tool's name as its alt text. Each SVG already carries a title and label.
+
 The app icons and the interface colors below are the earlier ones. They stay until new ones are decided.
 
 ### App icon
