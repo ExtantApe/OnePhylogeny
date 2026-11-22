@@ -20,6 +20,15 @@ Follow-ups to the external samples change, closing three gaps its audit left. Pa
 - **Gaps left:** CI doesn't run the Postgres tests, to keep it free of Docker. A raw 23505 that Payload hasn't already converted was never seen from a real database. Not run on SQLite, behind a pooler, or on Postgres before 17. No live NCBI run and no large file. The admin wasn't looked at.
 - **Left out as overkill:** fetching from NCBI in tests; the fixture pins the records and its README gives the ids and checksum.
 
+## 2026-11-21: identity match statistics in core
+
+Owner decisions of 2026-11-19 and 2026-11-21, relayed (a mitochondrial match means the same maternal line only; hosts need match statistics for samples that may be one animal). Core tests went from 339 to 364 (`packages/core/test/identity.test.ts`, 25 new, made-up seeded data).
+
+- **Promises:** `identityMatch` counts shared alleles without treating a missing call as a match or a mismatch; it gives the probability of identity for unrelated animals and full siblings, and likelihood ratios against both under a stated error model; the verdict is `match` only when every check passes and `insufficient` whenever it can't decide; mitochondrial, haploid and hemizygous loci are left out, and a mitochondrial-only set says why; a clonal taxon never gets a match; a bad frequency is left out and counted, never guessed; the result is plain JSON.
+- **Covered:** the formulas against numbers worked by hand in the test comments; 200 identical loci and 40 duplicates with 1% injected errors match; 300 each of sibling, parent and young, and unrelated pairs give no match; each gate (too few loci, no frequencies, sibling probability too high, ratio too low, clonal, mitochondrial only) and each `no-match` route; bad frequencies by reason; bad error rates and non-finite inputs throw; 5,000 loci stay finite; the JSON round trip.
+- **Gaps left:** not run on real genotypes. Linked loci aren't detected: independence is stated in the docs and left to the caller. Loci with very many alleles aren't timed. No host screen shows the reasons yet.
+- **Left out as overkill:** a test per reason's wording; the codes are pinned and the text is free to improve.
+
 ## 2026-11-21: external samples in the Payload plugin
 
 Owner decision of 2026-11-21, relayed. Payload tests went from 40 to 58 (`packages/payload/test/external.test.ts`, 18 new, with its own Payload instance on MongoDB; `records.test.ts` gains one assertion that a registered sample is `internal`). Six of the 18 came from the review of the first version: the accession index and `other` failing closed.
