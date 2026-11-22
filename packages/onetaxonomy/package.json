@@ -1,6 +1,6 @@
 {
   "name": "@extantape/onephylogeny-onetaxonomy",
-  "version": "0.1.0-alpha.9",
+  "version": "0.1.0-alpha.10",
   "description": "Optional bridge from OnePhylogeny to OneTaxonomy: exports finished trees as Phylogeny records, with their support values and explicit taxon mappings.",
   "keywords": [
     "phylogenetics",
