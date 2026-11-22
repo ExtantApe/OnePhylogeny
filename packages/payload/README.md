@@ -72,3 +72,14 @@ The accession check works on MongoDB and Postgres. Its tests against Postgres sk
 
 `ecoregion` is the most any page may show of where a sample came from, in three realms: `land`, `marine` and `freshwater`. Each value carries the dataset and version it came from, and a realm you pin in `ecoregions` refuses any other set. Precise localities never enter the plugin: a sample with a coordinate anywhere in it is refused. Keep them in your own collection, with your own audit.
 
+### Importing GenBank records
+
+```ts
+import { importGenBank } from '@extantape/payload-plugin-onephylogeny'
+
+const report = await importGenBank(payload, genBankText, { subject: referenceSubjectId })
+// { created: [{ accession, id }], duplicates: [{ accession, id }], failed: [{ accession, reason }] }
+```
+
+Each record becomes an external sample: `public-database`, `GenBank`, the accession without its version, the voucher, collector and date precision where the record gives them, its citation, a link to the record, and a `rawReads` pointer checked by the sequence's SHA-256. GenBank states no license, so `dataLicense` is `unknown` and only a pointer is kept; `tier: 'cache'` is refused. `subject` is yours, an id or a function of the record: the plugin doesn't decide what a reference record is. `lat_lon` and the place text are never read, so no coordinate and no country is stored. Running it twice makes nothing new and lists the accessions already held. `genBankToExternalSample(record)` does the mapping alone. The test fixture is five real public records in `fixtures/external/`.
+
