@@ -1,16 +1,20 @@
+<picture><source media="(prefers-color-scheme: dark)" srcset="brand/oneorigin/marks/onephylogeny-dark.svg"><img src="brand/oneorigin/marks/onephylogeny-light.svg" alt="" width="96" height="96"></picture>
+
 # OnePhylogeny
 
 A source-available, species-agnostic framework for acquiring sequence evidence, building reference panels and testing samples against them, with provenance and honest uncertainty. For developers, labs, researchers and keepers.
 
-> **Status: early alpha.** The core science, NCBI acquisition, engine, CLI, React views, bridges, Payload plugin and Mac app work and are tested. The packages are on npm as early alphas, the Mac app isn't notarized, and results aren't forensically validated. See [the roadmap](docs/architecture/roadmap.md) and [limitations](docs/architecture/limitations.md).
+> **Status: early alpha.** The packages are on npm as `0.1.0-alpha` versions, and the Mac app is on GitHub Releases. About 700 automated tests pass: 364 in core, 80 each in the engine and the Payload plugin, and the rest across the command line, NCBI acquisition, React views, bridges and the Mac app's interface. The Payload plugin's Postgres tests run only when a database is given, so CI skips them. Results haven't been forensically validated, the rule values aren't calibrated on real data, and the Mac app isn't notarized. See [limitations](docs/architecture/limitations.md) and [the roadmap](docs/architecture/roadmap.md).
 
-OnePhylogeny is part of the [OneOrigin suite](docs/oneorigin/README.md): three independent tools, with no subscriptions, that work alone or together.
+OnePhylogeny is part of the [OneOrigin suite](docs/oneorigin/README.md): five independent tools, with no subscriptions, that work alone or together.
 
 | Tool | Question it answers |
 | --- | --- |
 | [OneTaxonomy](https://github.com/ExtantApe/OneTaxonomy) | What do sources claim, and how do we browse those classifications and trees? |
-| [OnePedigree](https://github.com/ExtantApe/OnePedigree) | How is this individual related to known relatives? |
+| [OneLineage](https://github.com/ExtantApe/OneLineage) | Coming soon: the tree of life |
 | **OnePhylogeny** | Given DNA, what does the evidence support, and where does this sample fit? |
+| [OnePedigree](https://github.com/ExtantApe/OnePedigree) | How is this individual related to known relatives? |
+| [OneFamily](https://github.com/ExtantApe/OneFamily) | Given my DNA matches, how might we be related? |
 
 ## Principles
 
@@ -18,7 +22,7 @@ OnePhylogeny is part of the [OneOrigin suite](docs/oneorigin/README.md): three i
 - **Everything is programmatic and saved.** Profiles describe a run; runs are immutable records of what actually happened.
 - **Evidence is traceable.** Every record keeps its accession version, hash, publication and provenance class.
 - **Honest results.** Results are candidate sets, including `not_evaluable`; no shared sites never means excluded.
-- **Your sources, your choice.** OnePhylogeny ships adapters, not authoritative data or panels.
+- **Your sources, your choice.** OnePhylogeny ships adapters for the sources you pick, and no data or panels of its own.
 
 The full rules are in [scientific invariants](docs/architecture/scientific-invariants.md).
 
@@ -50,7 +54,7 @@ onephylogeny trace     --workspace DIR --profile ID --type T --key K   # everyth
 onephylogeny sources   --taxon NAME_OR_TAXID   # what SRA, NCBI Datasets, GBIF, iDigBio and BOLD list; counts only, never coordinates
 ```
 
-A profile is plain JSON and holds every choice: taxa, marker, reference, filters, outgroups, groups and rules.
+A profile is plain JSON and holds every choice: taxa, marker, reference, filters, outgroups, groups and rules. `onephylogeny help` lists all 23 commands, including curation sheets, hypothesis checks, panel comparison and verification, reports, Sanger reads and SNP comparisons.
 
 `sources` needs the network and no profile. It lists and counts, and downloads nothing: SRA runs, genome assemblies, and how many GBIF, iDigBio and BOLD records there are by country. These say what exists, not where any animal came from. A service that doesn't answer is named and the command exits 1, so a missing count never reads as zero. The Mac app shows the same under Public data in the Study tab, when you press its button.
 
@@ -77,7 +81,7 @@ pnpm --filter onephylogeny-desktop dev       # browser preview with made-up data
 
 - [Tutorial](docs/tutorial.md): build a panel, test samples and read a report on example data, offline, then the [concept pages](docs/concepts/README.md)
 - [Architecture](docs/architecture/architecture.md), [data schema](docs/architecture/data-schema.md), [technical decisions](docs/architecture/adr/README.md), [owner decisions](docs/architecture/decisions.md)
-- [The OneOrigin suite](docs/oneorigin/README.md) and its [guidelines](docs/oneorigin/guidelines.md) (draft)
+- [The OneOrigin suite](docs/oneorigin/README.md) and its [guidelines](docs/oneorigin/guidelines.md)
 - [Analysis protocol](docs/architecture/analysis-protocol.md): what results can claim, and the rules fixed before testing
 - [Roadmap](docs/architecture/roadmap.md), [phase plan](docs/architecture/phase-plan.md), [limitations](docs/architecture/limitations.md)
 

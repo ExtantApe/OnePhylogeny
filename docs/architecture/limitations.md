@@ -12,7 +12,7 @@ Kept current. Nothing listed here is claimed as done.
 - The Mac app uses an installed IQ-TREE from Homebrew rather than bundling one, and isn't notarized yet, so macOS asks people to confirm the first launch. It can't update itself yet either: download the new DMG from GitHub releases.
 - The Mac app's Tree tab reads Newick for display only; the OneTaxonomy export is the checked form.
 - The Payload plugin stores results and controls release. It doesn't compute, and it has no admin review screen beyond Payload's own forms.
-- OneTaxonomy export writes a phylogeny record, which OneTaxonomy can't yet open as a file in a Mac app because its Studio isn't built.
+- The OneTaxonomy export makes a phylogeny record in code. OneTaxonomy's Mac app opens tree files, snapshots and bundles, not a lone record, so the record reaches the app only inside a snapshot a program builds.
 - Reference panels depend on human curation. The app makes review by study easy, but it doesn't read papers.
 - Rule values come from the research notes and are uncalibrated. With them, groups under 5 records per column can't be compared at all, and a window with few sampling sites can't rule anything out.
 - Validation gates are our own proposals. Controls take minutes per testable claim, and the cross-study check can pass in one direction only.

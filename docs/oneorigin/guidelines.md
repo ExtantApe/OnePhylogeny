@@ -1,6 +1,6 @@
 # OneOrigin suite guidelines
 
-**Status: accepted by the owner on 2026-11-11 ("A: send it, accept guidelines (Recommended)").** Drafted 2026-11-04. These apply to the five tools of the [OneOrigin suite](README.md): OneTaxonomy, OneLineage, OnePhylogeny, OnePedigree and OneFamily. OneLineage is planned and has no repo yet. The brand text that used to be hand-copied into each repo's `brand/README.md` now lives in [brand.md](brand.md), and the machine-readable values in [tokens.json](tokens.json). Each tool carries a locked copy of this folder (section 10).
+**Status: accepted by the owner on 2026-11-11 ("A: send it, accept guidelines (Recommended)").** Drafted 2026-11-04. These apply to the five tools of the [OneOrigin suite](README.md): OneTaxonomy, OneLineage, OnePhylogeny, OnePedigree and OneFamily. OneLineage is coming soon: its repo holds the name, license and brand copy, with no code yet. The brand text that used to be hand-copied into each repo's `brand/README.md` now lives in [brand.md](brand.md), and the machine-readable values in [tokens.json](tokens.json). Each tool carries a locked copy of this folder (section 10).
 
 They exist so the tools feel like one suite and keep working together as they change, while each stays its own and none depends on another.
 
@@ -225,7 +225,7 @@ Each decision with alternatives gets an ADR. Limitations are kept current, and n
 
 ## 9. Parity today
 
-From a review of the first three repos on 2026-11-04, updated on 2026-11-07 after the Mac releases and OnePhylogeny's first npm publish. Bold marks what remains. OneFamily joined the suite on 2026-11-14 and hasn't been reviewed against this table yet, so it has no column; OneLineage gets one when its repo exists.
+From a review of the first three repos on 2026-11-04, updated on 2026-11-07 after the Mac releases and OnePhylogeny's first npm publish. Bold marks what remains. OneFamily joined the suite on 2026-11-14 and hasn't been reviewed against this table yet, so it has no column; OneLineage gets one when it has code.
 
 | Area | OnePedigree | OneTaxonomy | OnePhylogeny |
 | --- | --- | --- | --- |

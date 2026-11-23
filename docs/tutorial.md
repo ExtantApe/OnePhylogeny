@@ -13,12 +13,12 @@ You need Node 22 or later, pnpm and git. OnePhylogeny is installed from the repo
 <!-- step: install -->
 ```sh
 git clone https://github.com/ExtantApe/OnePhylogeny.git
-cd onephylogeny
+cd OnePhylogeny
 pnpm install
 pnpm build
 ```
 
-Stay in the `onephylogeny` folder for the rest. Then give the command a short name, make an empty workspace, and copy the tutorial's profile and curation into it:
+Stay in the `OnePhylogeny` folder for the rest. Then give the command a short name, make an empty workspace, and copy the tutorial's profile and curation into it:
 
 <!-- step: setup -->
 ```sh
@@ -257,7 +257,7 @@ The output is one JSON result per sample, about 570 lines. Here is the start of 
     "producedBy": [
       {
         "name": "onephylogeny-engine",
-        "version": "0.1.0-alpha.7"
+        "version": "0.1.0-alpha.10"
       },
       {
         "name": "alignToReference",
@@ -365,7 +365,7 @@ Overall: good. These describe the sequence and don't change any status.
 - Panel: tutorial-panel 1 (candidate), checksum `sha256:0c7e1b6f412a07ba434e259fa80c37c1ce1428910423a588c4499b44e1cfd72d`
 - Sample: sample-1, sequence `sha256:d2b091e3b1e6792d5ae4d70accf5785b3ffe42a91c9b6c6fa01bde4346fb2b11`
 - Run: 2026-11-11T10-33-53-169Z-sample
-- Software: onephylogeny-engine 0.1.0-alpha.7, alignToReference 2
+- Software: onephylogeny-engine 0.1.0-alpha.10, alignToReference 2
 
 ## Sources
 
