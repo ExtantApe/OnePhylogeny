@@ -19,7 +19,7 @@
 :root[data-appearance='light'] { color-scheme: light; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-button, select, input, textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; min-height: 32px; }
+button, select, input, textarea { font: inherit; color: var(--text); background: var(--field); border: 1px solid var(--ophy-control); border-radius: 8px; padding: 5px 10px; min-height: 32px; }
 textarea { width: 100%; font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
 input, select { width: 100%; }
 button { cursor: pointer; width: auto; }

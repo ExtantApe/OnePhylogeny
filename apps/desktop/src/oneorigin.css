@@ -3,6 +3,7 @@
 :root {
   --ophy-accent: #cf8137;
   --ophy-focus: #a65f20;
+  --ophy-control: #7f8693;
   --ophy-brand-pink: #e48185;
   --ophy-structure: #4c312c;
   --ophy-mauve: #91645d;
@@ -27,6 +28,7 @@
   :root:not([data-appearance='light']) {
     --ophy-accent: #e7a066;
     --ophy-focus: #e7a066;
+    --ophy-control: #6b7485;
     --ophy-brand-pink: #eda9ac;
     --ophy-structure: #eda9ac;
     --ophy-mauve: #c79a92;
@@ -43,6 +45,7 @@
 :root[data-appearance='dark'] {
   --ophy-accent: #e7a066;
   --ophy-focus: #e7a066;
+  --ophy-control: #6b7485;
   --ophy-brand-pink: #eda9ac;
   --ophy-structure: #eda9ac;
   --ophy-mauve: #c79a92;
@@ -54,4 +57,8 @@
   --ophy-good: #62c196;
   --ophy-warning: #dfb269;
   --ophy-error: #eda9ac;
+}
+/* Reduce motion in System Settings: nothing spins, slides or fades (design audit 2026-11-16). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
