@@ -70,12 +70,13 @@ describe('tokens.json', () => {
     assert.deepEqual(Object.values(tokens.tools).map((t) => t.prefix).sort(), ['op', 'ophy', 'ot'])
   })
 
-  it('keeps focus rings 3:1 or better, and text 4.5:1, on every background each tool uses', () => {
+  it('keeps focus rings and control outlines 3:1 or better, and text 4.5:1, on every background each tool uses', () => {
     for (const [id, tool] of Object.entries(tokens.tools)) {
       for (const mode of ['light', 'dark']) {
         const c = (name) => (tool.color[name] ?? tokens.color[name])[mode]
         for (const bg of [c('background'), c('panel')]) {
           assert.ok(contrast(c('focus'), bg) >= 3, `${id} ${mode} focus on ${bg}: ${contrast(c('focus'), bg).toFixed(2)}`)
+          assert.ok(contrast(c('control'), bg) >= 3, `${id} ${mode} control outline on ${bg}: ${contrast(c('control'), bg).toFixed(2)}`)
           for (const fg of ['text', 'muted']) assert.ok(contrast(c(fg), bg) >= 4.5, `${id} ${mode} ${fg} on ${bg}`)
         }
       }
