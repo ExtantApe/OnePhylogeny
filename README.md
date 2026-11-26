@@ -87,6 +87,10 @@ pnpm --filter onephylogeny-desktop dev       # browser preview with made-up data
 
 Changes are listed in the [changelog](CHANGELOG.md).
 
+## Citing
+
+If OnePhylogeny helps your research, cite it from `CITATION.cff`. GitHub's **Cite this repository** button reads the same file. There's no DOI yet.
+
 ## License
 
 [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0) for the software: free for noncommercial use, with attribution; commercial use needs a separate license from EXTANT APE. Data you import keeps its own license. This software is research tooling and is not forensically validated.
