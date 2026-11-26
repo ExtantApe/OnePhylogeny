@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: If you use OnePhylogeny in your work, please cite it using these details.
+type: software
+title: "OnePhylogeny"
+abstract: "A source-available, species-agnostic framework for acquiring sequence evidence, building reference panels and placing samples in lineages, with provenance and honest uncertainty."
+authors:
+  - name: EXTANT APE
+    website: "https://github.com/ExtantApe"
+repository-code: "https://github.com/ExtantApe/OnePhylogeny"
+url: "https://github.com/ExtantApe/OnePhylogeny#readme"
+license: PolyForm-Noncommercial-1.0.0
+keywords:
+  - phylogenetics
+  - phylogeography
+  - mitochondrial-dna
+  - reference-panel
+  - haplotype
+  - wildlife-forensics
+  - provenance
